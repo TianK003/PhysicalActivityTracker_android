@@ -13,7 +13,8 @@ secretsGradlePlugin = "2.0.1"
 navigationCompose = "2.8.9"
 kotlinSerialization = "1.8.0"
 lifecycleViewmodelCompose = "2.8.7"
-
+preferences="1.1.5"
+datastore="1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +36,9 @@ secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.se
 navigation-compose  = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-datastore = {group = "androidx.datastore", name = "datastore-preferences", version.ref = "preferences"}
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Activity Tracker</string>
+    <string name="save_settings">Save Settings</string>
+    <string name="language">Language</string>
+    <string name="units">Units</string>
+    <string name="english">English</string>
+    <string name="swedish">Swedish</string>
+    <string name="kilometers">Kilometers (km)</string>
+    <string name="miles">Miles (mi)</string>
 </resources>

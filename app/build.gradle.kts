@@ -63,6 +63,9 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.kotlin.serialization)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences.core)
 }
 
 secrets {
