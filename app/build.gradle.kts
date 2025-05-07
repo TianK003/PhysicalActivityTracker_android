@@ -59,6 +59,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // maps implementation
     implementation(libs.maps.compose)
+    // navigation and stuff
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlin.serialization)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }
 
 secrets {

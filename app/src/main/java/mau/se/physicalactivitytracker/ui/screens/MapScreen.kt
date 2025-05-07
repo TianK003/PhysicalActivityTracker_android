@@ -1,11 +1,13 @@
 package mau.se.physicalactivitytracker.ui.screens
 
+import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -15,7 +17,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.rememberCameraPositionState
-import java.util.jar.Manifest
 
 @Composable
 fun MapScreen() {
@@ -25,15 +26,16 @@ fun MapScreen() {
         position = CameraPosition.fromLatLngZoom(defaultLocation, 10f)
     }
 
+    // State to track location permissions
+    val locationPermissionsGranted = remember { mutableStateOf(false) }
+
     // Check location permissions
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        // Handle permission results
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
-            // Permission granted, enable location layer
-        }
+        // Update permissions state
+        locationPermissionsGranted.value = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
     }
 
     // Check permissions when the screen is first launched
@@ -49,6 +51,8 @@ fun MapScreen() {
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             )
+        } else {
+            locationPermissionsGranted.value = true
         }
     }
 
@@ -56,7 +60,7 @@ fun MapScreen() {
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(
-            isMyLocationEnabled = true
+            isMyLocationEnabled = locationPermissionsGranted.value
         )
     )
 }
