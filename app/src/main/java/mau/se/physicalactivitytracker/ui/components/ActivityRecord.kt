@@ -99,22 +99,18 @@ fun ActivityRecord(
                     ),
                     color = MaterialTheme.colorScheme.primary
                 )
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_map),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(start = 8.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
             if (isExpanded) {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
                         // Steps row with icon
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -147,6 +143,25 @@ fun ActivityRecord(
                             Text(
                                 text = duration,
                                 style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+
+                    // Map icon container
+                    Surface(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable { /* Do nothing for now */ },
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        tonalElevation = 2.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_map),
+                                contentDescription = "View on map",
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
