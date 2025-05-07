@@ -1,9 +1,6 @@
 package mau.se.physicalactivitytracker.ui.components
 
 import androidx.compose.runtime.remember
-
-package mau.se.physicalactivitytracker.ui.components
-
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -117,8 +115,40 @@ fun ActivityRecord(
                         .padding(8.dp)
                 ) {
                     Column {
-                        Text("Steps: $steps", modifier = Modifier.padding(bottom = 2.dp))
-                        Text("Duration: $duration")
+                        // Steps row with icon
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_step),
+                                contentDescription = "Steps",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "$steps",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        // Duration row with icon
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_time),
+                                contentDescription = "Duration",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = duration,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
             }
