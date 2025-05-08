@@ -59,8 +59,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // maps implementation
     implementation(libs.maps.compose)
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.google.android.gms:play-services-maps:19.2.0")
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.androidx.material)
     // navigation and stuff
     implementation(libs.navigation.compose)
     implementation(libs.kotlin.serialization)
