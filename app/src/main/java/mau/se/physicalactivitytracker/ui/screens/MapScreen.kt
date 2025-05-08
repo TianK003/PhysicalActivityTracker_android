@@ -47,12 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import android.view.HapticFeedbackConstants
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.res.painterResource
 import com.google.android.gms.maps.CameraUpdateFactory
 import kotlinx.coroutines.launch
+import mau.se.physicalactivitytracker.ui.components.StartActivityButton
 
-// Malmo Central Station coordinates
+// Malmo Central Station coordinates - default fallback if gps is not available
 private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
 
 @Composable
@@ -165,7 +165,7 @@ fun MapScreen() {
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().systemBarsPadding()) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
@@ -264,5 +264,12 @@ fun MapScreen() {
                 )
             }
         }
+
+        StartActivityButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            onClick = { /* Handle start activity click */ }
+        )
     }
 }

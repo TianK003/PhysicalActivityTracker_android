@@ -109,9 +109,9 @@ private fun LanguageDropdown(
             onValueChange = {},
             label = { Text("Language") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
+            modifier = Modifier.menuAnchor(
+                type = MenuAnchorType.PrimaryNotEditable,
+                enabled = true)
         )
 
         ExposedDropdownMenu(
@@ -147,15 +147,17 @@ private fun UnitsDropdown(
         expanded = expanded,
         onExpandedChange = { expanded = it }
     ) {
+        Modifier
+            .fillMaxWidth()
         OutlinedTextField(
             readOnly = true,
             value = units[useImperial] ?: "Kilometers (km)",
             onValueChange = {},
             label = { Text("Measurement Units") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
+            modifier = Modifier.menuAnchor(
+                type = MenuAnchorType.PrimaryNotEditable,
+                enabled = true)
         )
 
         ExposedDropdownMenu(

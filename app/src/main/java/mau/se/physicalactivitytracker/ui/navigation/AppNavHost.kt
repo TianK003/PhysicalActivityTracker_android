@@ -11,10 +11,12 @@ import mau.se.physicalactivitytracker.ui.screens.SettingsScreen
 
 @Composable
 fun AppNavHost(
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     startDestination: String = BottomNavItem.Map.route
 ) {
     NavHost(
+        modifier = modifier,
         navController = navController,
         startDestination = startDestination
     ) {

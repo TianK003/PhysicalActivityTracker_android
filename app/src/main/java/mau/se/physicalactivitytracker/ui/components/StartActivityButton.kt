@@ -9,7 +9,7 @@ import androidx.compose.ui.res.painterResource
 import mau.se.physicalactivitytracker.R
 
 @Composable
-fun AddButton(
+fun StartActivityButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {

@@ -12,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import mau.se.physicalactivitytracker.ui.components.AddButton
 import mau.se.physicalactivitytracker.ui.components.BottomNavigationBar
 import mau.se.physicalactivitytracker.ui.navigation.AppNavHost
 import mau.se.physicalactivitytracker.ui.navigation.BottomNavItem
@@ -57,14 +56,10 @@ fun ActivityTrackerApp() {
                     }
                 }
             }
-        },
-        floatingActionButton = {
-            if (selectedTab == BottomNavItem.Map) {
-                AddButton()
-            }
         }
     ) { innerPadding ->
         AppNavHost(
+            modifier = Modifier.padding(innerPadding),
             navController = navController,
             startDestination = BottomNavItem.Map.route,
         )
