@@ -33,7 +33,7 @@
 3. Build & Run
 
 ## Support
-Found an issue? [Open an ticket](https://github.com/yourusername/walk-activity-tracker/issues)
+Found an issue? [Open an ticket](https://github.com/TianK003/PhysicalActivityTracker_android/issues)
 
 ---
 
