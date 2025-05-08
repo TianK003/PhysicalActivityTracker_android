@@ -59,6 +59,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     // maps implementation
     implementation(libs.maps.compose)
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.gms:play-services-maps:19.2.0")
     // navigation and stuff
     implementation(libs.navigation.compose)
     implementation(libs.kotlin.serialization)
@@ -66,6 +68,7 @@ dependencies {
     // datastore
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
+
 }
 
 secrets {

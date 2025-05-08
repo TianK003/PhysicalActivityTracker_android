@@ -45,7 +45,8 @@ fun HistoryScreen(
                     ) {
                         Text(
                             text = "History",
-                            style = MaterialTheme.typography.headlineSmall
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
 

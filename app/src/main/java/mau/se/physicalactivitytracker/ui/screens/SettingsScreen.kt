@@ -68,7 +68,7 @@ fun SettingsScreen() {
             )
         ) {
             Text(
-                "Save Settings",
+                "Save",
                 style = MaterialTheme.typography.titleMedium
             )
         }
