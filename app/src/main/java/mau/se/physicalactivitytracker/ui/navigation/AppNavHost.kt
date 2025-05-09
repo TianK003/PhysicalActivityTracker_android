@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import mau.se.physicalactivitytracker.ui.screens.HistoryScreen
 import mau.se.physicalactivitytracker.ui.screens.MapScreen
-import mau.se.physicalactivitytracker.ui.screens.SaveWalkScreen
 import mau.se.physicalactivitytracker.ui.screens.SettingsScreen
 
 @Composable
@@ -21,9 +20,8 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(BottomNavItem.Map.route) { MapScreen(navController = navController) }
+        composable(BottomNavItem.Map.route) { MapScreen() }
         composable(BottomNavItem.History.route) { HistoryScreen() }
         composable(BottomNavItem.Settings.route) { SettingsScreen() }
-        composable("save_walk") { SaveWalkScreen(navController = navController)}
     }
 }
