@@ -16,7 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import mau.se.physicalactivitytracker.ui.components.ActivityRecord
 import mau.se.physicalactivitytracker.ui.components.DateRangeSelector
 import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModelFactory
-import mau.se.physicalactivitytracker.viewmodels.HistoryViewModel
+import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 

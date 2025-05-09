@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.viewmodels
+package mau.se.physicalactivitytracker.ui.viewmodels
 
 import android.app.Application
 import kotlinx.coroutines.flow.combine
