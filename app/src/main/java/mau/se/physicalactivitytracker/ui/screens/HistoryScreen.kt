@@ -1,5 +1,6 @@
 package mau.se.physicalactivitytracker.ui.screens
 
+import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import mau.se.physicalactivitytracker.ui.components.ActivityRecord
 import mau.se.physicalactivitytracker.ui.components.DateRangeSelector
+import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModelFactory
 import mau.se.physicalactivitytracker.viewmodels.HistoryViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -20,7 +23,11 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
-    viewModel: HistoryViewModel = viewModel()
+    viewModel: HistoryViewModel = viewModel(
+        factory = HistoryViewModelFactory(
+            application = LocalContext.current.applicationContext as Application
+        )
+    )
 ) {
     val activities by viewModel.activities.collectAsState()
     var showSortMenu by remember { mutableStateOf(false) }

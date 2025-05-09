@@ -1,10 +1,12 @@
 package mau.se.physicalactivitytracker.ui.screens
 
 import android.Manifest
+import android.app.Application // Required for ViewModelFactory
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,21 +49,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import android.view.HapticFeedbackConstants
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.ui.components.StartActivityButton
+import mau.se.physicalactivitytracker.ui.components.StopActivityButton
+import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
+import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModelFactory
 
 // Malmo Central Station coordinates - default fallback if gps is not available
 private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
 
 @Composable
-fun MapScreen() {
+fun MapScreen(
+    // Obtain MapViewModel using its factory
+    mapViewModel: MapViewModel = viewModel(
+        factory = MapViewModelFactory(LocalContext.current.applicationContext as Application)
+    )
+) {
     val context = LocalContext.current
     val view = LocalView.current
     val cameraPositionState = rememberCameraPositionState()
     var showGpsDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    // Observe recording state from ViewModel
+    val isRecording by mapViewModel.isRecording.collectAsState()
 
     // Location services
     val fusedLocationClient: FusedLocationProviderClient = remember {
@@ -70,6 +85,9 @@ fun MapScreen() {
 
     // Location permissions state
     var locationPermissionsGranted by remember { mutableStateOf(false) }
+    // Body sensors permission state (for step counter)
+    var bodySensorsPermissionGranted by remember { mutableStateOf(false) }
+
 
     // Check GPS status
     fun isGpsEnabled(): Boolean {
@@ -77,41 +95,81 @@ fun MapScreen() {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
-    // Location permission launcher
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
+    // Combined permission launcher for location and body sensors
+    val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
         val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
         locationPermissionsGranted = fineLocationGranted || coarseLocationGranted
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            bodySensorsPermissionGranted = permissions[Manifest.permission.ACTIVITY_RECOGNITION] ?: false
+        } else {
+            // For older APIs, BODY_SENSORS is used.
+            // However, step counter often works with ACTIVITY_RECOGNITION on Q+
+            // and might not need explicit BODY_SENSORS for basic step counting.
+            // If using TYPE_STEP_DETECTOR or other sensors, BODY_SENSORS might be needed.
+            // For simplicity, we'll assume ACTIVITY_RECOGNITION is the primary one for now.
+            // If you specifically need BODY_SENSORS:
+            // bodySensorsPermissionGranted = permissions[Manifest.permission.BODY_SENSORS] ?: false
+        }
+
+
         if (locationPermissionsGranted && !isGpsEnabled()) {
             showGpsDialog = true
         }
+
+        // TODO: Handle cases where body sensor permission is not granted, if critical
+        // if (!bodySensorsPermissionGranted) {
+        // Show a message or disable step counting features
+        // }
     }
 
     // Check permissions on launch
     LaunchedEffect(Unit) {
+        val requiredPermissions = mutableListOf<String>()
+
+        // Location Permissions
         val hasFineLocation = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-
         val hasCoarseLocation = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-
         locationPermissionsGranted = hasFineLocation || hasCoarseLocation
-
         if (!locationPermissionsGranted) {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        } else if (!isGpsEnabled()) {
+            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            requiredPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+
+        // Body Sensors / Activity Recognition Permission (for step counter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val hasActivityRecognition = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.ACTIVITY_RECOGNITION
+            ) == PackageManager.PERMISSION_GRANTED
+            bodySensorsPermissionGranted = hasActivityRecognition
+            if (!hasActivityRecognition) {
+                requiredPermissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        } else {
+            // For API < Q, if you were to use BODY_SENSORS directly:
+            // val hasBodySensors = ContextCompat.checkSelfPermission(
+            // context, Manifest.permission.BODY_SENSORS
+            // ) == PackageManager.PERMISSION_GRANTED
+            // bodySensorsPermissionGranted = hasBodySensors
+            // if (!hasBodySensors) {
+            // requiredPermissions.add(Manifest.permission.BODY_SENSORS)
+            // }
+            // For now, we assume step detector might work without explicit BODY_SENSORS on older APIs
+            // or that ACTIVITY_RECOGNITION is sufficient on Q+ for the step detector.
+            // This part might need adjustment based on the exact step sensor implementation.
+        }
+
+
+        if (requiredPermissions.isNotEmpty()) {
+            permissionLauncher.launch(requiredPermissions.toTypedArray())
+        } else if (locationPermissionsGranted && !isGpsEnabled()) {
             showGpsDialog = true
         }
     }
@@ -133,6 +191,11 @@ fun MapScreen() {
                             15f
                         )
                     }
+                }.addOnFailureListener {
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(
+                        MALMO_CENTRAL,
+                        15f
+                    )
                 }
             } catch (e: SecurityException) {
                 // Handle exception if permissions revoked after granted
@@ -148,7 +211,7 @@ fun MapScreen() {
         AlertDialog(
             onDismissRequest = { showGpsDialog = false },
             title = { Text("GPS Required") },
-            text = { Text("Please enable GPS for accurate location tracking") },
+            text = { Text("Please enable GPS for accurate location tracking.") },
             confirmButton = {
                 Button({
                     context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
@@ -166,16 +229,15 @@ fun MapScreen() {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
-                isMyLocationEnabled = locationPermissionsGranted
+                isMyLocationEnabled = locationPermissionsGranted // MyLocation layer on map
             ),
             uiSettings = MapUiSettings(
                 zoomControlsEnabled = false,
-                myLocationButtonEnabled = false,
+                myLocationButtonEnabled = false, // We have our own
                 compassEnabled = true
             )
         )
@@ -183,9 +245,9 @@ fun MapScreen() {
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .align(Alignment.BottomStart) // Changed from TopStart
+                .align(Alignment.BottomStart)
         ) {
-            // Zoom In Button with haptic
+            // Zoom In Button
             IconButton(
                 onClick = {
                     view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
@@ -207,7 +269,7 @@ fun MapScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Zoom Out Button with haptic
+            // Zoom Out Button
             IconButton(
                 onClick = {
                     view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
@@ -229,7 +291,7 @@ fun MapScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Current Location Button with haptic
+            // Current Location Button
             IconButton(
                 onClick = {
                     view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
@@ -250,6 +312,12 @@ fun MapScreen() {
                         } catch (e: SecurityException) {
                             // Handle permission issues
                         }
+                    } else {
+                        // Optionally, prompt for permissions again or show a message
+                        val requiredPermissions = mutableListOf<String>()
+                        requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+                        requiredPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        permissionLauncher.launch(requiredPermissions.toTypedArray())
                     }
                 },
                 modifier = Modifier
@@ -265,11 +333,57 @@ fun MapScreen() {
             }
         }
 
-        StartActivityButton(
+        // Conditionally display Start or Stop button
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            onClick = { /* Handle start activity click */ }
-        )
+                .padding(16.dp)
+        ) {
+            if (isRecording) {
+                StopActivityButton(
+                    onClick = {
+                        // Perform haptic feedback
+                        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        mapViewModel.stopActivity()
+                    }
+                )
+            } else {
+                StartActivityButton(
+                    onClick = {
+                        // Perform haptic feedback
+                        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        // Check for permissions before starting
+                        if (locationPermissionsGranted && (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || bodySensorsPermissionGranted)) {
+                            if (isGpsEnabled()){
+                                mapViewModel.startActivity()
+                            } else {
+                                showGpsDialog = true
+                            }
+                        } else {
+                            // Request permissions if not granted
+                            val requiredPerms = mutableListOf<String>()
+                            if (!locationPermissionsGranted) {
+                                requiredPerms.add(Manifest.permission.ACCESS_FINE_LOCATION)
+                                requiredPerms.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !bodySensorsPermissionGranted) {
+                                requiredPerms.add(Manifest.permission.ACTIVITY_RECOGNITION)
+                            }
+                            // Add other permissions like BODY_SENSORS if needed for older APIs and specific sensors
+                            // else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && !bodySensorsPermissionGranted){
+                            //    requiredPerms.add(Manifest.permission.BODY_SENSORS)
+                            // }
+
+                            if (requiredPerms.isNotEmpty()) {
+                                permissionLauncher.launch(requiredPerms.toTypedArray())
+                            } else if (!isGpsEnabled()){
+                                showGpsDialog = true // Show GPS dialog if permissions are fine but GPS is off
+                            }
+                        }
+                    }
+                )
+            }
+        }
     }
 }
+
