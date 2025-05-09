@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.data.record.model
+package mau.se.physicalactivitytracker.data.records.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

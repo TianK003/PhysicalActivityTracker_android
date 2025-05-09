@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.data.record.db
+package mau.se.physicalactivitytracker.data.records.db
 
 import androidx.room.TypeConverter
 import java.util.Date

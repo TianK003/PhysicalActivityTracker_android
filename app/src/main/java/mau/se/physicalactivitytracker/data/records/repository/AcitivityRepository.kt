@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.data.record.repository
+package mau.se.physicalactivitytracker.data.records.repository
 
 import android.content.Context
 import com.google.gson.Gson
@@ -6,10 +6,10 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import mau.se.physicalactivitytracker.data.record.db.ActivityRecordDao
-import mau.se.physicalactivitytracker.data.record.model.ActivityRecord
-import mau.se.physicalactivitytracker.data.record.model.InertialSensorData
-import mau.se.physicalactivitytracker.data.record.model.LocationPoint
+import mau.se.physicalactivitytracker.data.records.db.ActivityRecordDao
+import mau.se.physicalactivitytracker.data.records.model.ActivityRecord
+import mau.se.physicalactivitytracker.data.records.model.InertialSensorData
+import mau.se.physicalactivitytracker.data.records.model.LocationPoint
 import java.io.File
 import java.io.IOException
 import java.util.Date

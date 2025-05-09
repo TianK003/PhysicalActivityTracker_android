@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.data.record.db
+package mau.se.physicalactivitytracker.data.records.db
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -7,7 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
-import mau.se.physicalactivitytracker.data.record.model.ActivityRecord
+import mau.se.physicalactivitytracker.data.records.model.ActivityRecord
 
 /**
  * Data Access Object (DAO) for the ActivityRecord entity.

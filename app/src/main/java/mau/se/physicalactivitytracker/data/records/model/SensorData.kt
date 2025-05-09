@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.data.record.model
+package mau.se.physicalactivitytracker.data.records.model
 
 // Represents a single GPS data point for JSON serialization
 data class LocationPoint(
