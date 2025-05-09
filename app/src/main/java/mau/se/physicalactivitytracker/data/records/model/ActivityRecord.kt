@@ -8,7 +8,7 @@ import java.util.Date
 data class ActivityRecord(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    var name: String? = null,
+    var name: String = "Unnamed walk",
     val date: Date,
     var stepCount: Int,
     var elapsedTimeMs: Long,

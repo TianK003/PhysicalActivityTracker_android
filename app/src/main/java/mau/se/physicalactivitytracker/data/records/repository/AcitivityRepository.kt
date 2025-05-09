@@ -69,7 +69,7 @@ class ActivityRepository(
      * @return The ID of the newly created activity record, or -1 if an error occurred.
      */
     suspend fun addActivity(
-        name: String?,
+        name: String,
         date: Date,
         stepCount: Int,
         elapsedTimeMs: Long,
