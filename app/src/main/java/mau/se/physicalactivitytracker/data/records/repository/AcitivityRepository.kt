@@ -47,6 +47,11 @@ class ActivityRepository(
         return activityRecordDao.getAllActivityRecords()
     }
 
+    fun getActivitiesBetweenDates(start: Date, end: Date): Flow<List<ActivityRecord>> {
+        return activityRecordDao.getActivityRecordsByDateRange(start.time, end.time)
+    }
+
+
     /**
      * Retrieves a specific activity record by its ID.
      * @param id The ID of the activity record.

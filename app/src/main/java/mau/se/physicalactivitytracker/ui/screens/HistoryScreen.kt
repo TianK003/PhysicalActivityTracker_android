@@ -1,6 +1,6 @@
 package mau.se.physicalactivitytracker.ui.screens
 
-import android.app.Application
+import HistoryViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,31 +8,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import mau.se.physicalactivitytracker.ui.components.ActivityRecord
 import mau.se.physicalactivitytracker.ui.components.DateRangeSelector
-import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModelFactory
-import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(
-    viewModel: HistoryViewModel = viewModel(
-        factory = HistoryViewModelFactory(
-            application = LocalContext.current.applicationContext as Application
-        )
-    )
-) {
+fun HistoryScreen(viewModel: HistoryViewModel = viewModel()) {
     val activities by viewModel.activities.collectAsState()
-    var showSortMenu by remember { mutableStateOf(false) }
-    var showPicker by remember { mutableStateOf(false) }
+    var showSortMenu by rememberSaveable { mutableStateOf(false) }
+    var showPicker by rememberSaveable { mutableStateOf(false) }
     val currentSortType by viewModel.sortType.collectAsState()
+    val startDate by viewModel.startDate.collectAsState()
+    val endDate by viewModel.endDate.collectAsState()
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     Scaffold(
@@ -63,7 +57,6 @@ fun HistoryScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Sort Button
                         Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
@@ -99,10 +92,9 @@ fun HistoryScreen(
 
                         Spacer(Modifier.weight(1f))
 
-                        // Date Range Picker (placeholder)
                         DateRangeSelector(
-                            startDate = Date(),
-                            endDate = Date(),
+                            startDate = startDate,
+                            endDate = endDate,
                             dateFormatter = dateFormatter,
                             onClick = { showPicker = true }
                         )
@@ -111,16 +103,65 @@ fun HistoryScreen(
             }
         }
     ) { padding ->
-        LazyColumn(contentPadding = padding) {
-            items(activities) { activity ->
-                ActivityRecord(
-                    name = activity.name,
-                    date = activity.date,
-                    distance = activity.distance,
-                    steps = activity.steps,
-                    duration = activity.duration
+        if (activities.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No tracking data available.\nTry a different time range.",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        } else {
+            LazyColumn(contentPadding = padding) {
+                items(activities) { activity ->
+                    ActivityRecord(
+                        name = activity.name,
+                        date = activity.date,
+                        distance = activity.distance,
+                        steps = activity.steps,
+                        duration = activity.duration
+                    )
+                }
+            }
+        }
+    }
+
+    if (showPicker) {
+        val pickerState = rememberDateRangePickerState(
+            initialSelectedStartDateMillis = startDate.time,
+            initialSelectedEndDateMillis = endDate.time
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showPicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pickerState.selectedStartDateMillis?.let { startMillis ->
+                            pickerState.selectedEndDateMillis?.let { endMillis ->
+                                viewModel.updateDates(
+                                    start = Date(startMillis),
+                                    end = Date(endMillis)
+                                )
+                            }
+                        }
+                        showPicker = false
+                    }
+                ) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DateRangePicker(
+                state = pickerState,
+                title = { Text("Select date range", Modifier.padding(16.dp)) }
+            )
         }
     }
 }

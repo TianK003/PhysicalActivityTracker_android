@@ -11,7 +11,7 @@ import mau.se.physicalactivitytracker.data.records.model.ActivityRecord
  * The Room database for the application.
  * Contains the 'activity_records' table.
  */
-@Database(entities = [ActivityRecord::class], version = 1, exportSchema = false)
+@Database(entities = [ActivityRecord::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -44,7 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                     // Add migrations here if you change the schema in the future
                     // .addMigrations(MIGRATION_1_2)
-                    .fallbackToDestructiveMigration(false) // If migrations are not set, it will recreate the database (data loss)
+                    .fallbackToDestructiveMigration(true) // If migrations are not set, it will recreate the database (data loss)
                     .build()
                 INSTANCE = instance
                 // return instance
