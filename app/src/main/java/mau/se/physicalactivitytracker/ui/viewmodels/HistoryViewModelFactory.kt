@@ -3,7 +3,6 @@ package mau.se.physicalactivitytracker.ui.viewmodels
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import mau.se.physicalactivitytracker.viewmodels.HistoryViewModel
 
 class HistoryViewModelFactory(
     private val application: Application

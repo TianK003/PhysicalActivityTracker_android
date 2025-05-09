@@ -52,6 +52,7 @@ import android.view.HapticFeedbackConstants
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.ui.components.StartActivityButton
@@ -64,7 +65,7 @@ private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
 
 @Composable
 fun MapScreen(
-    // Obtain MapViewModel using its factory
+    navController: NavController,
     mapViewModel: MapViewModel = viewModel(
         factory = MapViewModelFactory(LocalContext.current.applicationContext as Application)
     )
@@ -345,6 +346,7 @@ fun MapScreen(
                         // Perform haptic feedback
                         view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                         mapViewModel.stopActivity()
+                        navController.navigate("save_walk")
                     }
                 )
             } else {

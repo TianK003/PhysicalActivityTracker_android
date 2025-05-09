@@ -31,6 +31,23 @@ class MapViewModel(
     private val activityRepository: ActivityRepository
 ) : ViewModel() {
 
+    private val _elapsedTimeMs = MutableStateFlow<Long?>(null)
+    val elapsedTimeMs: StateFlow<Long?> = _elapsedTimeMs.asStateFlow()
+
+    private val _stepCount = MutableStateFlow<Int?>(null)
+    val stepCount: StateFlow<Int?> = _stepCount.asStateFlow()
+
+    fun saveActivity(name: String) {
+        val elapsed = _elapsedTimeMs.value ?: return
+        val steps = _stepCount.value ?: return
+
+        viewModelScope.launch {
+            // Existing save logic from stopActivity() goes here
+            // Update the name parameter to use the passed name
+            // Clear temporary data after saving
+        }
+    }
+
     // Private MutableStateFlow to hold the recording state
     private val _isRecording = MutableStateFlow(false)
     // Public StateFlow to observe the recording state from the UI
