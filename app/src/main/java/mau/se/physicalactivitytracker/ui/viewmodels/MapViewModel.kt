@@ -31,22 +31,77 @@ class MapViewModel(
     private val activityRepository: ActivityRepository
 ) : ViewModel() {
 
+    private val _showNameDialog = MutableStateFlow(false)
+    val showNameDialog: StateFlow<Boolean> = _showNameDialog.asStateFlow()
+
+    private var _temporaryActivityData: TemporaryActivityData? = null
+
+    data class TemporaryActivityData(
+        val elapsedTimeMs: Long,
+        val stepCount: Int,
+        val gpsPoints: List<LocationPoint>,
+        val inertialData: InertialSensorData,
+        val activityStartTime: Long,
+        val distanceMeters: Double
+    )
+
+    fun stopActivity() {
+        if (_isRecording.value) {
+            _isRecording.value = false
+            val endTime = System.currentTimeMillis()
+            val elapsedTimeMs = endTime - activityStartTime
+
+            // Collect data
+            val stepCount = collectedStepDetectorEvents.size
+            val inertialData = InertialSensorData(
+                collectedAccelerometerData.toList(),
+                collectedGyroscopeData.toList(),
+                collectedStepDetectorEvents.toList()
+            )
+            val gpsPoints = collectedGpsPoints.toList()
+
+            _temporaryActivityData = TemporaryActivityData(
+                elapsedTimeMs,
+                stepCount,
+                gpsPoints,
+                inertialData,
+                activityStartTime,
+                0.0 // Replace with actual calculation if needed
+            )
+            _showNameDialog.value = true
+        }
+    }
+
+    fun saveActivity(name: String) {
+        val data = _temporaryActivityData ?: return
+
+        viewModelScope.launch {
+            activityRepository.addActivity(
+                name = name,
+                date = Date(data.activityStartTime),
+                stepCount = data.stepCount,
+                elapsedTimeMs = data.elapsedTimeMs,
+                distanceMeters = data.distanceMeters,
+                gpsPoints = data.gpsPoints,
+                inertialData = data.inertialData
+            ).also { recordId ->
+                // Handle success/failure
+            }
+            _temporaryActivityData = null
+            _showNameDialog.value = false
+        }
+    }
+
+    fun cancelSaveActivity() {
+        _temporaryActivityData = null
+        _showNameDialog.value = false
+    }
+
     private val _elapsedTimeMs = MutableStateFlow<Long?>(null)
     val elapsedTimeMs: StateFlow<Long?> = _elapsedTimeMs.asStateFlow()
 
     private val _stepCount = MutableStateFlow<Int?>(null)
     val stepCount: StateFlow<Int?> = _stepCount.asStateFlow()
-
-    fun saveActivity(name: String) {
-        val elapsed = _elapsedTimeMs.value ?: return
-        val steps = _stepCount.value ?: return
-
-        viewModelScope.launch {
-            // Existing save logic from stopActivity() goes here
-            // Update the name parameter to use the passed name
-            // Clear temporary data after saving
-        }
-    }
 
     // Private MutableStateFlow to hold the recording state
     private val _isRecording = MutableStateFlow(false)
@@ -87,55 +142,4 @@ class MapViewModel(
             // collectedGpsPoints.add(LocationPoint(System.currentTimeMillis(), 55.60, 13.00, 10.0, 5f))
         }
     }
-
-    /**
-     * Stops the current activity recording and saves the data.
-     */
-    fun stopActivity() {
-        if (_isRecording.value) {
-            _isRecording.value = false
-            val endTime = System.currentTimeMillis()
-            val elapsedTimeMs = endTime - activityStartTime
-
-            // TODO: Stop sensor data collection here.
-
-            // Create a name for the activity based on the current time
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            sdf.timeZone = TimeZone.getDefault() // Use local timezone
-            val activityName = "Walk - ${sdf.format(Date(activityStartTime))}"
-
-            // Placeholder for step count - to be replaced with actual sensor data
-            val stepCount = collectedStepDetectorEvents.size // Or from TYPE_STEP_COUNTER
-
-            // Placeholder for distance - can be calculated from GPS points later
-            val distanceMeters = 0.0 // calculateDistance(collectedGpsPoints)
-
-            viewModelScope.launch {
-                val inertialData = InertialSensorData(
-                    accelerometerReadings = collectedAccelerometerData.toList(), // Make copies
-                    gyroscopeReadings = collectedGyroscopeData.toList(),
-                    stepDetectorEvents = collectedStepDetectorEvents.toList()
-                )
-
-                val recordId = activityRepository.addActivity(
-                    name = activityName,
-                    date = Date(activityStartTime),
-                    stepCount = stepCount,
-                    elapsedTimeMs = elapsedTimeMs,
-                    distanceMeters = distanceMeters,
-                    gpsPoints = collectedGpsPoints.toList(), // Make copies
-                    inertialData = inertialData
-                )
-
-                if (recordId != -1L) {
-                    Toast.makeText(application, "Activity saved: $activityName", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(application, "Failed to save activity", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-
-    // Optional: Add a helper function to calculate distance if needed in the future
-    // private fun calculateDistance(points: List<LocationPoint>): Double { ... }
 }

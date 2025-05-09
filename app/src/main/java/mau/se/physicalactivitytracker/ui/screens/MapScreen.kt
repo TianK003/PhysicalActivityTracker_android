@@ -49,14 +49,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import android.view.HapticFeedbackConstants
+import android.widget.Toast
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.ui.components.StartActivityButton
-import mau.se.physicalactivitytracker.ui.components.StopActivityButton
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModelFactory
 
@@ -65,7 +79,6 @@ private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
 
 @Composable
 fun MapScreen(
-    navController: NavController,
     mapViewModel: MapViewModel = viewModel(
         factory = MapViewModelFactory(LocalContext.current.applicationContext as Application)
     )
@@ -75,6 +88,7 @@ fun MapScreen(
     val cameraPositionState = rememberCameraPositionState()
     var showGpsDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var stopButtonJob by remember { mutableStateOf<Job?>(null) }
 
     // Observe recording state from ViewModel
     val isRecording by mapViewModel.isRecording.collectAsState()
@@ -341,14 +355,41 @@ fun MapScreen(
                 .padding(16.dp)
         ) {
             if (isRecording) {
-                StopActivityButton(
-                    onClick = {
-                        // Perform haptic feedback
-                        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                        mapViewModel.stopActivity()
-                        navController.navigate("save_walk")
-                    }
-                )
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = { _ ->
+                                    view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                    val job = scope.launch {
+                                        delay(3000)
+                                        mapViewModel.stopActivity() // This should trigger the dialog
+                                    }
+                                    stopButtonJob = job
+                                    tryAwaitRelease() // Waits until the press is released
+                                    job.cancel()
+                                    if (job.isCancelled) {
+                                        // Show toast if released before 3 seconds
+                                        Toast.makeText(
+                                            context,
+                                            "Hold for 3sec to stop recording",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_stop_tracking),
+                        contentDescription = "Stop activity",
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
             } else {
                 StartActivityButton(
                     onClick = {
@@ -387,5 +428,56 @@ fun MapScreen(
             }
         }
     }
+    NameDialog(mapViewModel)
 }
 
+@Composable
+private fun NameDialog(
+    viewModel: MapViewModel
+) {
+    var name by remember { mutableStateOf("") }
+
+    if (viewModel.showNameDialog.collectAsState().value) {
+        Dialog(
+            onDismissRequest = { /* Prevent dismiss */ },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        ) {
+            Surface(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Name Your Walk", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(Modifier.height(16.dp))
+                    TextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Walk name") },
+                        singleLine = true
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextButton(
+                            onClick = { viewModel.cancelSaveActivity() }
+                        ) { Text("Cancel") }
+                        Spacer(Modifier.width(8.dp))
+                        Button(
+                            onClick = { viewModel.saveActivity(name) },
+                            enabled = name.isNotBlank()
+                        ) { Text("Save") }
+                    }
+                }
+            }
+        }
+    }
+}

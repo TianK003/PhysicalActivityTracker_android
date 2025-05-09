@@ -114,6 +114,7 @@ fun HistoryScreen(
         LazyColumn(contentPadding = padding) {
             items(activities) { activity ->
                 ActivityRecord(
+                    name = activity.name,
                     date = activity.date,
                     distance = activity.distance,
                     steps = activity.steps,

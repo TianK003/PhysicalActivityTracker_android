@@ -55,6 +55,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     enum class SortType { DATE, DISTANCE, DURATION }
 
     data class ActivityData(
+        val name: String,
         val date: Date,
         val distance: Double,
         val steps: Int,
@@ -66,6 +67,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 // Extension function to convert ActivityRecord to ActivityData
 private fun ActivityRecord.toActivityData(): HistoryViewModel.ActivityData {
     return HistoryViewModel.ActivityData(
+        name = name,
         date = date,
         distance = distanceMeters ?: 0.0,
         steps = stepCount,

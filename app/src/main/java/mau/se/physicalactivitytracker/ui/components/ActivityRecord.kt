@@ -54,6 +54,7 @@ private fun formatDistance(distance: Double): String {
 
 @Composable
 fun ActivityRecord(
+    name: String,
     date: Date,
     distance: Double,
     steps: Int,
@@ -88,7 +89,7 @@ fun ActivityRecord(
                 )
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = sdf.format(date),
+                    text = name,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f)
                 )
@@ -111,6 +112,17 @@ fun ActivityRecord(
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
+                        // date
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        ) {
+                            Text(
+                                text = sdf.format(date),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                         // Steps row with icon
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
