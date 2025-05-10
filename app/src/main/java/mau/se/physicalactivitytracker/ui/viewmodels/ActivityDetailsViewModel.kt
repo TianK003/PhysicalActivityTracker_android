@@ -2,13 +2,18 @@ package mau.se.physicalactivitytracker.ui.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import mau.se.physicalactivitytracker.data.records.db.AppDatabase
 import mau.se.physicalactivitytracker.data.records.model.LocationPoint
 import mau.se.physicalactivitytracker.data.records.repository.ActivityRepository
+import java.util.Date
 
 // ActivityDetailsViewModel.kt
 class ActivityDetailsViewModel(
