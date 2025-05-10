@@ -59,6 +59,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.window.Dialog
@@ -70,7 +71,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.ui.components.StartActivityButton
-import mau.se.physicalactivitytracker.ui.theme.MaterialGreen
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModelFactory
 
@@ -139,11 +139,6 @@ fun MapScreen(
         if (locationPermissionsGranted && !isGpsEnabled()) {
             showGpsDialog = true
         }
-
-        // TODO: Handle cases where body sensor permission is not granted, if critical
-        // if (!bodySensorsPermissionGranted) {
-        // Show a message or disable step counting features
-        // }
     }
 
     // Check permissions on launch
@@ -229,8 +224,8 @@ fun MapScreen(
             if (gpsPoints.isNotEmpty()) {
                 Polyline(
                     points = gpsPoints.map { LatLng(it.latitude, it.longitude) },
-                    color = MaterialGreen,
-                    width = 8f
+                    color = Color.Red,
+                    width = 16f
                 )
             }
         }

@@ -153,12 +153,16 @@ class MapViewModel(
                     Log.e("MapViewModel", "Failed to save activity")
                 }
             }
+            _gpsPoints.value = emptyList()
+            collectedGpsPoints.clear()
             _temporaryActivityData = null
             _showNameDialog.value = false
         }
     }
 
     fun cancelSaveActivity() {
+        _gpsPoints.value = emptyList()
+        collectedGpsPoints.clear()
         _temporaryActivityData = null
         _showNameDialog.value = false
     }
@@ -194,6 +198,9 @@ class MapViewModel(
 
     private fun startSensorCollection() {
         sensorDataManager.startListening()
+        // Just in case anythign was left destroy all previous points
+        _gpsPoints.value = emptyList()
+        collectedGpsPoints.clear()
 
         // Collect accelerometer data
         viewModelScope.launch {

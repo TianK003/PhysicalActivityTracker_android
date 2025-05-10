@@ -60,7 +60,8 @@ fun ActivityRecord(
     steps: Int,
     duration: String,
     modifier: Modifier = Modifier,
-    initialExpanded: Boolean = false
+    initialExpanded: Boolean = false,
+    onMapClick: () -> Unit
 ) {
     var isExpanded by rememberSaveable { mutableStateOf(initialExpanded) }
     val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
@@ -70,7 +71,8 @@ fun ActivityRecord(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { isExpanded = !isExpanded }
-            .animateContentSize(),
+            .animateContentSize()
+            .clickable { onMapClick() },
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 2.dp

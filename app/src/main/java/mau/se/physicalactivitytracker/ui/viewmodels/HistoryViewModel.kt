@@ -96,6 +96,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     enum class SortType { DATE, DISTANCE, DURATION }
 
     data class ActivityData(
+        val id: Long,
         val name: String,
         val date: Date,
         val distance: Double,
@@ -106,6 +107,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
 
     private fun ActivityRecord.toActivityData(): ActivityData {
         return ActivityData(
+            id = id,
             name = name,
             date = date,
             distance = distanceMeters ?: 0.0,
