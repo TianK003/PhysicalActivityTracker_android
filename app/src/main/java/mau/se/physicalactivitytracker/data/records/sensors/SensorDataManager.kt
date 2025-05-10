@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 import kotlinx.coroutines.channels.Channel
 import mau.se.physicalactivitytracker.data.records.model.*
 
@@ -23,9 +24,12 @@ class SensorDataManager(context: Context) : SensorEventListener {
 
     /** Start streaming data (UI delay ≈ 60 Hz is fine for walking) */
     fun startListening() {
-        accelerometer?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
-        gyroscope?.let    { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
-        stepDetector?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+        accelerometer?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        Log.d("SensorDataManager", "Accelerometer listener registered") }
+        gyroscope?.let    { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        Log.d("SensorDataManager", "Gyroscope listener registered") }
+        stepDetector?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+        Log.d("SensorDataManager", "Step detector listener registered") }
     }
 
     /** Always pair with stopListening to avoid battery drain */

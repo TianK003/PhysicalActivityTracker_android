@@ -90,6 +90,8 @@ fun MapScreen(
     val scope = rememberCoroutineScope()
     var stopButtonJob by remember { mutableStateOf<Job?>(null) }
 
+    val permissionState by mapViewModel.permissionState.collectAsState()
+
     // Observe recording state from ViewModel
     val isRecording by mapViewModel.isRecording.collectAsState()
 
@@ -114,6 +116,7 @@ fun MapScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
+        mapViewModel.handlePermissionResult(permissions)
         val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
         val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
         locationPermissionsGranted = fineLocationGranted || coarseLocationGranted
@@ -142,50 +145,14 @@ fun MapScreen(
     }
 
     // Check permissions on launch
-    LaunchedEffect(Unit) {
-        val requiredPermissions = mutableListOf<String>()
-
-        // Location Permissions
-        val hasFineLocation = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        val hasCoarseLocation = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        locationPermissionsGranted = hasFineLocation || hasCoarseLocation
-        if (!locationPermissionsGranted) {
-            requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            requiredPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        }
-
-        // Body Sensors / Activity Recognition Permission (for step counter)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val hasActivityRecognition = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.ACTIVITY_RECOGNITION
-            ) == PackageManager.PERMISSION_GRANTED
-            bodySensorsPermissionGranted = hasActivityRecognition
-            if (!hasActivityRecognition) {
-                requiredPermissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
+    LaunchedEffect(permissionState) {
+        when (val state = permissionState) {
+            is MapViewModel.PermissionState.Required -> {
+                permissionLauncher.launch(state.permissions.toTypedArray())
+                // Reset the permission state after handling
+                mapViewModel.handlePermissionResult(emptyMap())
             }
-        } else {
-            // For API < Q, if you were to use BODY_SENSORS directly:
-            // val hasBodySensors = ContextCompat.checkSelfPermission(
-            // context, Manifest.permission.BODY_SENSORS
-            // ) == PackageManager.PERMISSION_GRANTED
-            // bodySensorsPermissionGranted = hasBodySensors
-            // if (!hasBodySensors) {
-            // requiredPermissions.add(Manifest.permission.BODY_SENSORS)
-            // }
-            // For now, we assume step detector might work without explicit BODY_SENSORS on older APIs
-            // or that ACTIVITY_RECOGNITION is sufficient on Q+ for the step detector.
-            // This part might need adjustment based on the exact step sensor implementation.
-        }
-
-
-        if (requiredPermissions.isNotEmpty()) {
-            permissionLauncher.launch(requiredPermissions.toTypedArray())
-        } else if (locationPermissionsGranted && !isGpsEnabled()) {
-            showGpsDialog = true
+            else -> {}
         }
     }
 

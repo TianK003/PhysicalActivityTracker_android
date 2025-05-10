@@ -7,6 +7,7 @@ import android.app.Application
 import android.content.Context
 import android.widget.Toast
 import android.location.Location
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -55,7 +56,6 @@ class MapViewModel(
     private lateinit var locationManager: LocationManager
     private var elapsedTimeJob: Job? = null
 
-
     private var _temporaryActivityData: TemporaryActivityData? = null
 
     data class TemporaryActivityData(
@@ -95,6 +95,7 @@ class MapViewModel(
                 activityStartTime,
                 0.0 // Replace with actual calculation if needed
             )
+            val distanceMeters = calculateDistance(gpsPoints)
             _showNameDialog.value = true
         }
     }
@@ -102,13 +103,15 @@ class MapViewModel(
     fun saveActivity(name: String) {
         val data = _temporaryActivityData ?: return
 
+        val distance = calculateDistance(_temporaryActivityData!!.gpsPoints)
+
         viewModelScope.launch {
             activityRepository.addActivity(
                 name = name,
                 date = Date(data.activityStartTime),
                 stepCount = data.stepCount,
                 elapsedTimeMs = data.elapsedTimeMs,
-                distanceMeters = data.distanceMeters,
+                distanceMeters = distance,
                 gpsPoints = data.gpsPoints,
                 inertialData = data.inertialData
             ).also { recordId ->
@@ -167,12 +170,10 @@ class MapViewModel(
 
     fun handlePermissionResult(permissions: Map<String, Boolean>) {
         val denied = permissions.filter { !it.value }.keys
-        if (denied.isEmpty()) {
-            _permissionState.value = PermissionState.Granted
+        _permissionState.value = if (denied.isEmpty()) {
+            PermissionState.Granted
         } else {
-            _permissionState.value = PermissionState.Denied(
-                "Required permissions denied: ${denied.joinToString()}"
-            )
+            PermissionState.Denied("Denied: ${denied.joinToString()}")
         }
     }
 
@@ -201,6 +202,7 @@ class MapViewModel(
         // Collect accelerometer data
         viewModelScope.launch {
             sensorDataManager.accelerometerChannel.consumeAsFlow().collect { data ->
+                Log.d("Data", "Accelerometer data collected: $data")
                 collectedAccelerometerData.add(data)
             }
         }
@@ -208,6 +210,7 @@ class MapViewModel(
         // Collect gyroscope data
         viewModelScope.launch {
             sensorDataManager.gyroscopeChannel.consumeAsFlow().collect { data ->
+                Log.d("Data", "Gyroscope data collected: $data")
                 collectedGyroscopeData.add(data)
             }
         }
@@ -215,6 +218,7 @@ class MapViewModel(
         // Collect step detector events
         viewModelScope.launch {
             sensorDataManager.stepDetectorChannel.consumeAsFlow().collect { event ->
+                Log.d("Data", "Step detector event collected: $event")
                 collectedStepDetectorEvents.add(event)
             }
         }
