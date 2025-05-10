@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.provider.Settings
@@ -32,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
@@ -67,10 +65,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.maps.android.compose.Polyline
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.ui.components.StartActivityButton
+import mau.se.physicalactivitytracker.ui.theme.MaterialGreen
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModelFactory
 
@@ -89,6 +89,8 @@ fun MapScreen(
     var showGpsDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var stopButtonJob by remember { mutableStateOf<Job?>(null) }
+    // to draw
+    val gpsPoints by mapViewModel.gpsPoints.collectAsState()
 
     val permissionState by mapViewModel.permissionState.collectAsState()
 
@@ -117,12 +119,12 @@ fun MapScreen(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         mapViewModel.handlePermissionResult(permissions)
-        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         locationPermissionsGranted = fineLocationGranted || coarseLocationGranted
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            bodySensorsPermissionGranted = permissions[Manifest.permission.ACTIVITY_RECOGNITION] ?: false
+            bodySensorsPermissionGranted = permissions[Manifest.permission.ACTIVITY_RECOGNITION] == true
         } else {
             // For older APIs, BODY_SENSORS is used.
             // However, step counter often works with ACTIVITY_RECOGNITION on Q+
@@ -181,6 +183,7 @@ fun MapScreen(
                 }
             } catch (e: SecurityException) {
                 // Handle exception if permissions revoked after granted
+                e.printStackTrace()
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(MALMO_CENTRAL, 15f)
             }
         } else {
@@ -222,7 +225,15 @@ fun MapScreen(
                 myLocationButtonEnabled = false, // We have our own
                 compassEnabled = true
             )
-        )
+        ) {
+            if (gpsPoints.isNotEmpty()) {
+                Polyline(
+                    points = gpsPoints.map { LatLng(it.latitude, it.longitude) },
+                    color = MaterialGreen,
+                    width = 8f
+                )
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -293,6 +304,7 @@ fun MapScreen(
                             }
                         } catch (e: SecurityException) {
                             // Handle permission issues
+                            e.printStackTrace()
                         }
                     } else {
                         // Optionally, prompt for permissions again or show a message

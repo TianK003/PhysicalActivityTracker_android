@@ -7,7 +7,9 @@ import android.app.Application
 import android.content.Context
 import android.widget.Toast
 import android.location.Location
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -27,20 +29,13 @@ import mau.se.physicalactivitytracker.data.records.sensors.LocationManager
 import mau.se.physicalactivitytracker.data.records.sensors.SensorDataManager
 import java.util.Date
 
-/**
- * ViewModel for the MapScreen.
- * Handles the logic for starting, stopping, and managing activity recording.
- *
- * @param application The application context, used for things like Toasts.
- * @param activityRepository The repository for accessing activity data.
- */
 class MapViewModel(
-    private val application: Application, // AndroidViewModel can also be used if only context is needed
+    private val application: Application,
     private val activityRepository: ActivityRepository
 ) : ViewModel() {
 
     // permissions
-        sealed class PermissionState {
+    sealed class PermissionState {
         object Idle : PermissionState()
         object Granted : PermissionState()
         data class Required(val permissions: List<String>) : PermissionState()
@@ -57,6 +52,9 @@ class MapViewModel(
     private var elapsedTimeJob: Job? = null
 
     private var _temporaryActivityData: TemporaryActivityData? = null
+    // for drawing the line
+    private val _gpsPoints = MutableStateFlow<List<LocationPoint>>(emptyList())
+    val gpsPoints: StateFlow<List<LocationPoint>> = _gpsPoints.asStateFlow()
 
     data class TemporaryActivityData(
         val elapsedTimeMs: Long,
@@ -66,6 +64,38 @@ class MapViewModel(
         val activityStartTime: Long,
         val distanceMeters: Double
     )
+
+    private val _elapsedTimeMs = MutableStateFlow<Long?>(null)
+
+    private val _isRecording = MutableStateFlow(false)
+    val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
+    private var activityStartTime: Long = 0L
+
+    // all lists of data we store
+    private val collectedGpsPoints = mutableListOf<LocationPoint>()
+    private val collectedAccelerometerData = mutableListOf<AccelerometerData>()
+    private val collectedGyroscopeData = mutableListOf<GyroscopeData>()
+    private val collectedStepDetectorEvents = mutableListOf<StepDetectorEvent>()
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun startActivity(context: Context) {
+        if (!_isRecording.value) {
+            // Check permissions first
+            val requiredPermissions = listOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ).filter {
+                ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+            }
+
+            if (requiredPermissions.isNotEmpty()) {
+                _permissionState.value = PermissionState.Required(requiredPermissions)
+                return
+            }
+            // Proceed with initialization if permissions are granted
+            initializeSensors(context)
+        }
+    }
 
     fun stopActivity() {
         if (_isRecording.value) {
@@ -93,9 +123,9 @@ class MapViewModel(
                 gpsPoints,
                 inertialData,
                 activityStartTime,
-                0.0 // Replace with actual calculation if needed
+                0.0 // Calculated while saving
             )
-            val distanceMeters = calculateDistance(gpsPoints)
+
             _showNameDialog.value = true
         }
     }
@@ -115,7 +145,13 @@ class MapViewModel(
                 gpsPoints = data.gpsPoints,
                 inertialData = data.inertialData
             ).also { recordId ->
-                // Handle success/failure
+                // show to the user that the activity was saved
+                if (recordId != -1L) {
+                    Toast.makeText(application, "Activity saved", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(application, "Failed to save activity", Toast.LENGTH_SHORT).show()
+                    Log.e("MapViewModel", "Failed to save activity")
+                }
             }
             _temporaryActivityData = null
             _showNameDialog.value = false
@@ -125,47 +161,6 @@ class MapViewModel(
     fun cancelSaveActivity() {
         _temporaryActivityData = null
         _showNameDialog.value = false
-    }
-
-    private val _elapsedTimeMs = MutableStateFlow<Long?>(null)
-    val elapsedTimeMs: StateFlow<Long?> = _elapsedTimeMs.asStateFlow()
-
-    private val _stepCount = MutableStateFlow<Int?>(null)
-    val stepCount: StateFlow<Int?> = _stepCount.asStateFlow()
-
-    // Private MutableStateFlow to hold the recording state
-    private val _isRecording = MutableStateFlow(false)
-    // Public StateFlow to observe the recording state from the UI
-    val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
-
-    // To store start time of the activity
-    private var activityStartTime: Long = 0L
-
-    // Placeholder lists for sensor data
-    // In a real implementation, these would be populated by sensor listeners
-    private val collectedGpsPoints = mutableListOf<LocationPoint>()
-    private val collectedAccelerometerData = mutableListOf<AccelerometerData>()
-    private val collectedGyroscopeData = mutableListOf<GyroscopeData>()
-    private val collectedStepDetectorEvents = mutableListOf<StepDetectorEvent>()
-
-    fun startActivity(context: Context) {
-        if (!_isRecording.value) {
-            // Check permissions first
-            val requiredPermissions = listOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ).filter {
-                ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
-            }
-
-            if (requiredPermissions.isNotEmpty()) {
-                _permissionState.value = PermissionState.Required(requiredPermissions)
-                return
-            }
-
-            // Proceed with initialization if permissions are granted
-            initializeSensors(context)
-        }
     }
 
     fun handlePermissionResult(permissions: Map<String, Boolean>) {
@@ -185,6 +180,7 @@ class MapViewModel(
         activityStartTime = System.currentTimeMillis()
 
         collectedGpsPoints.clear()
+        _gpsPoints.value = emptyList()
         collectedAccelerometerData.clear()
         collectedGyroscopeData.clear()
         collectedStepDetectorEvents.clear()
@@ -224,16 +220,19 @@ class MapViewModel(
         }
     }
 
+    // collects GPS data
     private fun startLocationCollection() {
         locationManager.startLocationUpdates()
 
         viewModelScope.launch {
             locationManager.locationChannel.consumeAsFlow().collect { location ->
                 collectedGpsPoints.add(location)
+                _gpsPoints.value = collectedGpsPoints.toList()
             }
         }
     }
 
+    // starts counting time
     private fun startTimeTracking() {
         elapsedTimeJob = viewModelScope.launch {
             while (isRecording.value) {
@@ -243,6 +242,7 @@ class MapViewModel(
         }
     }
 
+    // calculate total distance covered in the activity
     private fun calculateDistance(points: List<LocationPoint>): Double {
         if (points.size < 2) return 0.0
 
