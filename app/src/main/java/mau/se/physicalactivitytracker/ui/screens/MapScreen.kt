@@ -1,7 +1,7 @@
 package mau.se.physicalactivitytracker.ui.screens
 
 import android.Manifest
-import android.app.Application // Required for ViewModelFactory
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -392,38 +392,8 @@ fun MapScreen(
                 }
             } else {
                 StartActivityButton(
-                    onClick = {
-                        // Perform haptic feedback
-                        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                        // Check for permissions before starting
-                        if (locationPermissionsGranted && (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || bodySensorsPermissionGranted)) {
-                            if (isGpsEnabled()){
-                                mapViewModel.startActivity()
-                            } else {
-                                showGpsDialog = true
-                            }
-                        } else {
-                            // Request permissions if not granted
-                            val requiredPerms = mutableListOf<String>()
-                            if (!locationPermissionsGranted) {
-                                requiredPerms.add(Manifest.permission.ACCESS_FINE_LOCATION)
-                                requiredPerms.add(Manifest.permission.ACCESS_COARSE_LOCATION)
-                            }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !bodySensorsPermissionGranted) {
-                                requiredPerms.add(Manifest.permission.ACTIVITY_RECOGNITION)
-                            }
-                            // Add other permissions like BODY_SENSORS if needed for older APIs and specific sensors
-                            // else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && !bodySensorsPermissionGranted){
-                            //    requiredPerms.add(Manifest.permission.BODY_SENSORS)
-                            // }
-
-                            if (requiredPerms.isNotEmpty()) {
-                                permissionLauncher.launch(requiredPerms.toTypedArray())
-                            } else if (!isGpsEnabled()){
-                                showGpsDialog = true // Show GPS dialog if permissions are fine but GPS is off
-                            }
-                        }
-                    }
+                    viewModel = mapViewModel,
+                    context = context
                 )
             }
         }

@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ActivityTrackerApp() {
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
