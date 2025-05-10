@@ -36,5 +36,4 @@ data class InertialSensorData(
     val accelerometerReadings: List<AccelerometerData> = emptyList(),
     val gyroscopeReadings: List<GyroscopeData> = emptyList(),
     val stepDetectorEvents: List<StepDetectorEvent> = emptyList()
-    // Add other sensor data lists here as needed (e.g., magnetometer)
 )
