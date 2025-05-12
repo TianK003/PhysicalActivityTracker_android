@@ -1,9 +1,7 @@
 package mau.se.physicalactivitytracker.ui.screens
 
 import android.app.Application
-import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +43,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import mau.se.physicalactivitytracker.R
@@ -63,7 +60,6 @@ fun ActivityDetailsScreen(
     onBack: () -> Unit,
     onBackButtonClick: () -> Unit
 ) {
-    val context = LocalContext.current
     val gpsPoints by viewModel.gpsPoints.collectAsState()
     val activityDetails by viewModel.activityDetails.collectAsState()
     val cameraPositionState = rememberCameraPositionState()
@@ -166,12 +162,14 @@ fun ActivityDetailsScreen(
                     // Date row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
                     ) {
                         Text(
                             text = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
                                 .format(details.date),
                             style = MaterialTheme.typography.bodyMedium
+
                         )
                     }
 
