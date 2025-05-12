@@ -15,7 +15,6 @@ import mau.se.physicalactivitytracker.data.records.model.LocationPoint
 import mau.se.physicalactivitytracker.data.records.repository.ActivityRepository
 import java.util.Date
 
-// ActivityDetailsViewModel.kt
 class ActivityDetailsViewModel(
     private val application: Application,
     private val activityRepository: ActivityRepository,

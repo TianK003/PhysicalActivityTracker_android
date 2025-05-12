@@ -1,7 +1,9 @@
 package mau.se.physicalactivitytracker.ui.screens
 
 import android.app.Application
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -42,6 +45,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import mau.se.physicalactivitytracker.R
@@ -56,7 +60,8 @@ fun ActivityDetailsScreen(
             activityId
         )
     ),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onBackButtonClick: () -> Unit
 ) {
     val context = LocalContext.current
     val gpsPoints by viewModel.gpsPoints.collectAsState()
@@ -122,7 +127,7 @@ fun ActivityDetailsScreen(
                         )
                     ),
                     title = "Start",
-                    icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_start_marker)
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
                 )
 
                 // Finish marker
@@ -134,7 +139,6 @@ fun ActivityDetailsScreen(
                         )
                     ),
                     title = "Finish",
-                    icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_end_marker)
                 )
             }
         }
@@ -199,6 +203,31 @@ fun ActivityDetailsScreen(
                         }
                     }
                 }
+            }
+        }
+
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+                .size(48.dp),
+            shape = CircleShape,
+            tonalElevation = 4.dp,
+            color = MaterialTheme.colorScheme.background
+        ) {
+            IconButton(
+                onClick = onBackButtonClick,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_go_back),
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }

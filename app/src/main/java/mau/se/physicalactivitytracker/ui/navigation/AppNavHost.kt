@@ -35,7 +35,8 @@ fun AppNavHost(
             val activityId = backStackEntry.arguments?.getLong("activityId") ?: 0L
             ActivityDetailsScreen(
                 activityId = activityId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onBackButtonClick = { navController.popBackStack() }
             )
         }
     }

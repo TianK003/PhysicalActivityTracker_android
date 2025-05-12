@@ -71,8 +71,7 @@ fun ActivityRecord(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { isExpanded = !isExpanded }
-            .animateContentSize()
-            .clickable { onMapClick() },
+            .animateContentSize(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 2.dp
@@ -165,7 +164,7 @@ fun ActivityRecord(
                     Surface(
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { /* Do nothing for now */ },
+                            .clickable { onMapClick() },
                         shape = RoundedCornerShape(8.dp),
                         color = MaterialTheme.colorScheme.primaryContainer,
                         tonalElevation = 2.dp
