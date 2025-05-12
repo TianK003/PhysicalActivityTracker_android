@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import android.location.Location
 import android.os.Build
@@ -27,6 +28,7 @@ import mau.se.physicalactivitytracker.data.records.model.StepDetectorEvent
 import mau.se.physicalactivitytracker.data.records.repository.ActivityRepository
 import mau.se.physicalactivitytracker.data.records.sensors.LocationManager
 import mau.se.physicalactivitytracker.data.records.sensors.SensorDataManager
+import mau.se.physicalactivitytracker.ui.services.TrackingService
 import java.util.Date
 
 class MapViewModel(
@@ -102,6 +104,10 @@ class MapViewModel(
             _isRecording.value = false
             val endTime = System.currentTimeMillis()
             val elapsedTimeMs = endTime - activityStartTime
+
+            // Stop notification service
+            val serviceIntent = Intent(application, TrackingService::class.java)
+            application.stopService(serviceIntent)
 
             // Collect data
             val stepCount = collectedStepDetectorEvents.size
@@ -189,6 +195,14 @@ class MapViewModel(
         collectedGyroscopeData.clear()
         collectedStepDetectorEvents.clear()
 
+        // start the notification service
+        val serviceIntent = Intent(context, TrackingService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
+        }
+
         startSensorCollection()
         startLocationCollection()
         startTimeTracking()
@@ -198,7 +212,7 @@ class MapViewModel(
 
     private fun startSensorCollection() {
         sensorDataManager.startListening()
-        // Just in case anythign was left destroy all previous points
+        // Just in case anything was left destroy all previous points
         _gpsPoints.value = emptyList()
         collectedGpsPoints.clear()
 

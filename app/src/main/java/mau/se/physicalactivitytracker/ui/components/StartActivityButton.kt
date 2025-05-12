@@ -1,9 +1,11 @@
 package mau.se.physicalactivitytracker.ui.components
 
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import mau.se.physicalactivitytracker.R
 import mau.se.physicalactivitytracker.ui.theme.MaterialGreen
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun StartActivityButton(
     modifier: Modifier = Modifier,
