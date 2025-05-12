@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.WalkTrack
 import mau.se.physicalactivitytracker.data.records.model.ActivityRecord
 import mau.se.physicalactivitytracker.data.records.repository.ActivityRepository
@@ -57,6 +58,12 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
     fun updateDates(start: Date, end: Date) {
         updateStartDate(start)
         updateEndDate(end)
+    }
+
+    fun deleteActivity(activityId: Long) {
+        viewModelScope.launch {
+            repository.deleteActivityById(activityId)
+        }
     }
 
     private fun updateStartDate(date: Date) {

@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import mau.se.physicalactivitytracker.data.records.db.ActivityRecordDao
 import mau.se.physicalactivitytracker.data.records.model.ActivityRecord
@@ -127,23 +128,22 @@ class ActivityRepository(
         }
     }
 
-    /**
-     * Updates an existing activity record.
-     * Note: This example does not handle updating the JSON files.
-     * If GPS/inertial data can change, you'd need to implement logic to rewrite those files.
-     *
-     * @param record The ActivityRecord to update.
-     */
     suspend fun updateActivityRecord(record: ActivityRecord) {
         withContext(Dispatchers.IO) {
             activityRecordDao.updateActivityRecord(record)
         }
     }
 
-    /**
-     * Deletes an activity record and its associated JSON files.
-     * @param record The ActivityRecord to delete.
-     */
+    suspend fun deleteActivityById(id: Long) {
+        withContext(Dispatchers.IO) {
+            // Get the record first
+            val record = activityRecordDao.getActivityRecordById(id).first()
+            record?.let {
+                deleteActivityRecord(it)
+            }
+        }
+    }
+
     suspend fun deleteActivityRecord(record: ActivityRecord) {
         withContext(Dispatchers.IO) {
             try {
@@ -167,11 +167,6 @@ class ActivityRepository(
         }
     }
 
-    /**
-     * Loads GPS data from the JSON file associated with an activity record.
-     * @param record The ActivityRecord whose GPS data is to be loaded.
-     * @return A list of LocationPoint objects, or null if an error occurs or file not found.
-     */
     suspend fun loadGpsData(record: ActivityRecord): List<LocationPoint>? {
         return withContext(Dispatchers.IO) {
             try {
@@ -190,11 +185,6 @@ class ActivityRepository(
         }
     }
 
-    /**
-     * Loads inertial data from the JSON file associated with an activity record.
-     * @param record The ActivityRecord whose inertial data is to be loaded.
-     * @return An InertialSensorData object, or null if an error occurs or file not found.
-     */
     suspend fun loadInertialData(record: ActivityRecord): InertialSensorData? {
         return withContext(Dispatchers.IO) {
             try {
@@ -212,22 +202,10 @@ class ActivityRepository(
         }
     }
 
-    /**
-     * Deletes all activity records and their associated JSON files.
-     * Use with extreme caution.
-     */
     suspend fun deleteAllActivities() {
         withContext(Dispatchers.IO) {
             // First, get all records to delete their files
-            val allRecords = activityRecordDao.getAllActivityRecords() // This should be a suspend function or runBlocking if DAO isn't Flow for one-shot
-            // For simplicity, assuming you might fetch them once if not using Flow here
-            // A better way for Flow: collect once.
-            // Or, iterate through files in the directory if names are predictable, but safer to use DB records.
-
-            // This is a simplified approach. For Flow, you'd collect the list first.
-            // Let's assume a temporary suspend fun in DAO for this or handle Flow collection.
-            // For now, this part needs adjustment based on how you fetch all records for deletion.
-            // A direct DAO method `getAllRecordsNonFlow(): List<ActivityRecord>` might be needed.
+            val allRecords = activityRecordDao.getAllActivityRecords()
 
             // Safer: Iterate through files in the directory and delete them
             activityDataDir.listFiles()?.forEach { file ->

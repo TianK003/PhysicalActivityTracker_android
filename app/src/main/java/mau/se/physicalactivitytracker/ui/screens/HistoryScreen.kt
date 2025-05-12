@@ -137,7 +137,8 @@ fun HistoryScreen(
                         duration = activity.duration,
                         onMapClick = {
                             navController.navigate("activity_details/${activity.id}")
-                        }
+                        },
+                        onDelete = { viewModel.deleteActivity(activity.id) }
                     )
                 }
             }

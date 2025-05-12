@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,9 +63,11 @@ fun ActivityRecord(
     duration: String,
     modifier: Modifier = Modifier,
     initialExpanded: Boolean = false,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
+    onDelete: () -> Unit = {}
 ) {
     var isExpanded by rememberSaveable { mutableStateOf(initialExpanded) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     Surface(
@@ -113,7 +117,6 @@ fun ActivityRecord(
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
-                        // date
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -124,7 +127,6 @@ fun ActivityRecord(
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                        // Steps row with icon
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -141,8 +143,6 @@ fun ActivityRecord(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
-
-                        // Duration row with icon
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -160,26 +160,71 @@ fun ActivityRecord(
                         }
                     }
 
-                    // Map icon container
-                    Surface(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable { onMapClick() },
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        tonalElevation = 2.dp
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_map),
-                                contentDescription = "View on map",
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                        // Map button
+                        Surface(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable { onMapClick() },
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            tonalElevation = 2.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_map),
+                                    contentDescription = "View on map",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+
+                        // Delete button
+                        Surface(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable { showDeleteDialog = true },
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            tonalElevation = 2.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_delete),
+                                    contentDescription = "Delete walk",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
                         }
                     }
                 }
             }
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Confirm Delete") },
+                text = { Text("Are you sure you want to delete this walk? This action cannot be undone.") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            onDelete()
+                        }
+                    ) { Text("Delete") }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showDeleteDialog = false }
+                    ) { Text("Cancel") }
+                }
+            )
         }
     }
 }
