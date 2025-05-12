@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalView
 import android.view.HapticFeedbackConstants
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -77,6 +78,7 @@ import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModelFactory
 // Malmo Central Station coordinates - default fallback if gps is not available
 private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MapScreen(
     mapViewModel: MapViewModel = viewModel(

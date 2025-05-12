@@ -83,11 +83,23 @@ class MapViewModel(
     fun startActivity(context: Context) {
         if (!_isRecording.value) {
             // Check permissions first
-            val requiredPermissions = listOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ).filter {
-                ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+            val requiredPermissions = mutableListOf<String>().apply {
+                // Add location and activity recognition permissions if not granted
+                addAll(
+                    listOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACTIVITY_RECOGNITION
+                    ).filter { perm ->
+                        ContextCompat.checkSelfPermission(context, perm) != PackageManager.PERMISSION_GRANTED
+                    }
+                )
+                // Add notification permission for Android 13+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val notificationPerm = Manifest.permission.POST_NOTIFICATIONS
+                    if (ContextCompat.checkSelfPermission(context, notificationPerm) != PackageManager.PERMISSION_GRANTED) {
+                        add(notificationPerm)
+                    }
+                }
             }
 
             if (requiredPermissions.isNotEmpty()) {
