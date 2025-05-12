@@ -31,7 +31,7 @@ class LocationManager(context: Context) {
 
     fun startLocationUpdates() {
         val locationRequest = LocationRequest.Builder(PRIORITY_HIGH_ACCURACY, 5000)
-            .setWaitForAccurateLocation(false) // Allow faster initial updates
+            .setWaitForAccurateLocation(false)
             .setMinUpdateIntervalMillis(3000)
             .build()
 

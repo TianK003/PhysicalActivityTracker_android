@@ -28,7 +28,6 @@ data class GyroscopeData(
 // Represents a single step detector event for JSON serialization
 data class StepDetectorEvent(
     val timestamp: Long
-    // You could add more info here if the sensor provides it, e.g., step confidence
 )
 
 // Container for all inertial data for a walk, for JSON serialization

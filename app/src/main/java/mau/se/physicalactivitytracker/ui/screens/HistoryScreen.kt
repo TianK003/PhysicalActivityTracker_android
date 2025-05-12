@@ -1,6 +1,6 @@
 package mau.se.physicalactivitytracker.ui.screens
 
-import HistoryViewModel
+import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModel
 import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

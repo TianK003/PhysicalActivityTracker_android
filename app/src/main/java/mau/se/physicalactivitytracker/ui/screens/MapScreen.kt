@@ -124,19 +124,7 @@ fun MapScreen(
         val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
         val coarseLocationGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         locationPermissionsGranted = fineLocationGranted || coarseLocationGranted
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            bodySensorsPermissionGranted = permissions[Manifest.permission.ACTIVITY_RECOGNITION] == true
-        } else {
-            // For older APIs, BODY_SENSORS is used.
-            // However, step counter often works with ACTIVITY_RECOGNITION on Q+
-            // and might not need explicit BODY_SENSORS for basic step counting.
-            // If using TYPE_STEP_DETECTOR or other sensors, BODY_SENSORS might be needed.
-            // For simplicity, we'll assume ACTIVITY_RECOGNITION is the primary one for now.
-            // If you specifically need BODY_SENSORS:
-            // bodySensorsPermissionGranted = permissions[Manifest.permission.BODY_SENSORS] ?: false
-        }
-
+        bodySensorsPermissionGranted = permissions[Manifest.permission.ACTIVITY_RECOGNITION] == true
 
         if (locationPermissionsGranted && !isGpsEnabled()) {
             showGpsDialog = true

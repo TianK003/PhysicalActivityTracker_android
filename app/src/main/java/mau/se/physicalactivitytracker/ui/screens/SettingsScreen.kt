@@ -9,7 +9,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import mau.se.physicalactivitytracker.viewmodels.SettingsViewModel
+import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 
 @Composable
 fun SettingsScreen() {

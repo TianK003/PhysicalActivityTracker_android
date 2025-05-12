@@ -15,15 +15,6 @@ import java.io.File
 import java.io.IOException
 import java.util.Date
 
-/**
- * Repository for managing ActivityRecord data.
- * It abstracts data operations from ViewModels and handles interactions with
- * the DAO and file system for JSON data.
- *
- * @param activityRecordDao The Data Access Object for activity records.
- * @param context The application context, needed for file operations.
- * @param gson Gson instance for JSON serialization/deserialization.
- */
 class ActivityRepository(
     private val activityRecordDao: ActivityRecordDao,
     private val context: Context,
@@ -40,10 +31,6 @@ class ActivityRepository(
         }
     }
 
-    /**
-     * Retrieves all activity records as a Flow.
-     * @return A Flow emitting a list of all ActivityRecords.
-     */
     fun getAllActivityRecords(): Flow<List<ActivityRecord>> {
         return activityRecordDao.getAllActivityRecords()
     }
@@ -52,28 +39,10 @@ class ActivityRepository(
         return activityRecordDao.getActivityRecordsByDateRange(start.time, end.time)
     }
 
-
-    /**
-     * Retrieves a specific activity record by its ID.
-     * @param id The ID of the activity record.
-     * @return A Flow emitting the ActivityRecord if found, or null.
-     */
     fun getActivityRecordById(id: Long): Flow<ActivityRecord?> {
         return activityRecordDao.getActivityRecordById(id)
     }
 
-    /**
-     * Adds a new activity, including saving its GPS and inertial data to JSON files.
-     *
-     * @param name Optional name for the activity.
-     * @param date The start date and time of the activity.
-     * @param stepCount Total steps for the activity.
-     * @param elapsedTimeMs Elapsed time in milliseconds.
-     * @param distanceMeters Optional distance in meters.
-     * @param gpsPoints List of LocationPoint objects.
-     * @param inertialData InertialSensorData object.
-     * @return The ID of the newly created activity record, or -1 if an error occurred.
-     */
     suspend fun addActivity(
         name: String,
         date: Date,

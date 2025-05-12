@@ -1,3 +1,6 @@
+package mau.se.physicalactivitytracker.ui.viewmodels
+
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -124,6 +127,7 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         )
     }
 
+    @SuppressLint("DefaultLocale")
     private fun formatDuration(millis: Long): String {
         val seconds = millis / 1000 % 60
         val minutes = millis / (1000 * 60) % 60
