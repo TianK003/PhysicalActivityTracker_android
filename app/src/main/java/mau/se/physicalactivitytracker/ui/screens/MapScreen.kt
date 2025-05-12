@@ -40,6 +40,7 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import mau.se.physicalactivitytracker.R
+import mau.se.physicalactivitytracker.ui.components.NameDialog
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,22 +50,14 @@ import androidx.compose.ui.platform.LocalView
 import android.view.HapticFeedbackConstants
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material3.Surface
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.Polyline
@@ -203,11 +196,11 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
-                isMyLocationEnabled = locationPermissionsGranted // MyLocation layer on map
+                isMyLocationEnabled = locationPermissionsGranted
             ),
             uiSettings = MapUiSettings(
                 zoomControlsEnabled = false,
-                myLocationButtonEnabled = false, // We have our own
+                myLocationButtonEnabled = false,
                 compassEnabled = true
             )
         ) {
@@ -292,7 +285,6 @@ fun MapScreen(
                             e.printStackTrace()
                         }
                     } else {
-                        // Optionally, prompt for permissions again or show a message
                         val requiredPermissions = mutableListOf<String>()
                         requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
                         requiredPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -319,24 +311,45 @@ fun MapScreen(
                 .padding(16.dp)
         ) {
             if (isRecording) {
+                var isBeingPressed by remember { mutableStateOf(false) }
+                val buttonScale by animateFloatAsState(
+                    targetValue = if (isBeingPressed) 1.2f else 1f,
+                    label = "buttonScale"
+                )
+                val buttonColor by animateColorAsState(
+                    targetValue = if (isBeingPressed) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.errorContainer,
+                    label = "buttonColor"
+                )
+                val iconTint by animateColorAsState(
+                    targetValue = if (isBeingPressed) MaterialTheme.colorScheme.onError
+                    else MaterialTheme.colorScheme.onErrorContainer,
+                    label = "iconTint"
+                )
+
                 Box(
                     modifier = Modifier
                         .size(72.dp)
+                        .graphicsLayer {
+                            scaleX = buttonScale
+                            scaleY = buttonScale
+                        }
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .background(buttonColor)
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onPress = { _ ->
-                                    view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                                    isBeingPressed = true
+                                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                                     val job = scope.launch {
                                         delay(3000)
-                                        mapViewModel.stopActivity() // This should trigger the dialog
+                                        mapViewModel.stopActivity()
                                     }
                                     stopButtonJob = job
-                                    tryAwaitRelease() // Waits until the press is released
+                                    tryAwaitRelease()
                                     job.cancel()
+                                    isBeingPressed = false
                                     if (job.isCancelled) {
-                                        // Show toast if released before 3 seconds
                                         Toast.makeText(
                                             context,
                                             "Hold for 3sec to stop recording",
@@ -348,11 +361,23 @@ fun MapScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_stop_tracking),
-                        contentDescription = "Stop activity",
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                color = if (isBeingPressed) Color.Black.copy(alpha = 0.2f)
+                                else Color.Transparent,
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_stop_tracking),
+                            contentDescription = "Stop activity",
+                            tint = iconTint,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             } else {
                 StartActivityButton(
@@ -363,55 +388,4 @@ fun MapScreen(
         }
     }
     NameDialog(mapViewModel)
-}
-
-@Composable
-private fun NameDialog(
-    viewModel: MapViewModel
-) {
-    var name by remember { mutableStateOf("") }
-
-    if (viewModel.showNameDialog.collectAsState().value) {
-        Dialog(
-            onDismissRequest = { /* Prevent dismiss */ },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false
-            )
-        ) {
-            Surface(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight(),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text("Name Your Walk", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(Modifier.height(16.dp))
-                    TextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Walk name") },
-                        singleLine = true
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        TextButton(
-                            onClick = { viewModel.cancelSaveActivity() }
-                        ) { Text("Cancel") }
-                        Spacer(Modifier.width(8.dp))
-                        Button(
-                            onClick = { viewModel.saveActivity(name) },
-                            enabled = name.isNotBlank()
-                        ) { Text("Save") }
-                    }
-                }
-            }
-        }
-    }
 }
