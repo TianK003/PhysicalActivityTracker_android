@@ -3,7 +3,6 @@ package mau.se.physicalactivitytracker
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.os.Build
 import mau.se.physicalactivitytracker.data.records.db.AppDatabase
 
@@ -29,7 +28,7 @@ class WalkTrack : Application() {
             }
             // Register the channel with the system
             val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
