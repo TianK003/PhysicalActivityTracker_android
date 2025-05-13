@@ -191,6 +191,17 @@ fun ActivityDetailsScreen(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Calc")
+                            Icon(
+                                painter = painterResource(R.drawable.ic_step),
+                                contentDescription = "Steps",
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text("${details.calculatedSteps}")
+                        }
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_time),
                                 contentDescription = "Duration",
