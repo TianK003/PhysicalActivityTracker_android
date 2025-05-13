@@ -23,7 +23,7 @@ class WalkTrack : Application() {
                 // This ID must match the one used in TrackingService
                 "tracking_channel",
                 "Activity Tracking",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Shows notifications during activity tracking"
             }
