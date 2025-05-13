@@ -74,7 +74,7 @@ class ActivityDetailsViewModel(
         }
 
         // Apply low-pass filter to smooth the data
-        val alpha = 0.8
+        val alpha = 0.5
         val filtered = mutableListOf(magnitudes[0])
         for (i in 1 until magnitudes.size) {
             filtered.add(alpha * filtered[i-1] + (1 - alpha) * magnitudes[i])
@@ -83,7 +83,7 @@ class ActivityDetailsViewModel(
         // Detect peaks indicating steps
         var stepCount = 0
         // Empirically determined
-        val threshold = 1.5
+        val threshold = 9
         // Minimum time between steps (ms) - max stride 200 per minute
         val minStepInterval = 300L
         var lastStepTime = accelerometerData.first().timestamp

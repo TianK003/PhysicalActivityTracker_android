@@ -97,7 +97,8 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         return calendar.time
     }
 
-    private fun getDefaultEndDate(): Date = Date()
+    // tomorrow
+    private fun getDefaultEndDate(): Date = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.time
 
     fun setSortType(sortType: SortType) {
         _sortType.value = sortType
