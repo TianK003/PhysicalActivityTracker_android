@@ -64,43 +64,84 @@ class ActivityDetailsViewModel(
     private fun calculateSteps(accelerometerData: List<AccelerometerData>): Int {
         if (accelerometerData.isEmpty()) return 0
 
-        // Compute magnitude for each accelerometer reading
+        // Compute magnitudes for each accelerometer reading
         val magnitudes = accelerometerData.map { accel ->
             sqrt(
                 accel.x.toDouble().pow(2) +
-                accel.y.toDouble().pow(2) +
-                accel.z.toDouble().pow(2)
+                        accel.y.toDouble().pow(2) +
+                        accel.z.toDouble().pow(2)
             )
         }
 
-        // Apply low-pass filter to smooth the data
-        val alpha = 0.5
+        // Apply better low-pass filter with more appropriate alpha
+        // Alpha = 0.1 gives more weight to the previous values (more smoothing) - empirically tested over multiple walks and values
+        val alpha = 0.1
         val filtered = mutableListOf(magnitudes[0])
         for (i in 1 until magnitudes.size) {
-            filtered.add(alpha * filtered[i-1] + (1 - alpha) * magnitudes[i])
+            filtered.add(alpha * magnitudes[i] + (1 - alpha) * filtered[i-1])
         }
 
-        // Detect peaks indicating steps
+        // Calculate the dynamic threshold based on the signal
+        // This adapts to the user's walking pattern and device sensitivity
+        val mean = filtered.average()
+        val stdDev = calculateStdDev(filtered, mean)
+
+        // Standard deviation helps us set an adaptive threshold
+        val baseThreshold = mean + 0.9 * stdDev
+
+        // Implement better peak detection with dynamic thresholding
         var stepCount = 0
-        // Empirically determined
-        val threshold = 9
-        // Minimum time between steps (ms) - max stride 200 per minute
-        val minStepInterval = 300L
+        // determined to work quite well
+        val minStepInterval = 400L
         var lastStepTime = accelerometerData.first().timestamp
 
-        for (i in 1 until filtered.size - 1) {
-            val prev = filtered[i-1]
+        // State tracking for peak detection
+        var isPotentialStep = false
+        var consecutiveAboveThreshold = 0
+        // Need this many points above threshold to count as potential step
+        val requiredConsecutivePoints = 2
+
+        for (i in 2 until filtered.size - 2) {
+            val prev2 = filtered[i-2]
+            val prev1 = filtered[i-1]
             val current = filtered[i]
-            val next = filtered[i+1]
+            val next1 = filtered[i+1]
+            val next2 = filtered[i+2]
+
+            // Ensure minimum time between steps
             val timeDiff = accelerometerData[i].timestamp - lastStepTime
 
-            if (current > prev && current > next && current > threshold && timeDiff >= minStepInterval) {
+            // Non-maxima supression of sorroundings
+            val isPeak = current > prev1 && current > prev2 &&
+                    current > next1 && current > next2 &&
+                    current > baseThreshold
+
+            // Require the signal to stay above threshold for consecutive readings
+            if (current > baseThreshold) {
+                consecutiveAboveThreshold++
+                if (consecutiveAboveThreshold >= requiredConsecutivePoints) {
+                    isPotentialStep = true
+                }
+            } else {
+                consecutiveAboveThreshold = 0
+            }
+
+            // Count a step when we see a peak after signal has been above threshold & enough time has passed since the last step
+            if (isPeak && isPotentialStep && timeDiff >= minStepInterval) {
                 stepCount++
                 lastStepTime = accelerometerData[i].timestamp
+                isPotentialStep = false  // Reset step tracking
+                consecutiveAboveThreshold = 0
             }
         }
 
         return stepCount
+    }
+
+    private fun calculateStdDev(values: List<Double>, mean: Double): Double {
+        if (values.size <= 1) return 0.0
+        val sumSquaredDifferences = values.sumOf { (it - mean).pow(2) }
+        return sqrt(sumSquaredDifferences / (values.size - 1))
     }
 
     @SuppressLint("DefaultLocale")
