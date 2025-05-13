@@ -32,6 +32,7 @@ class TrackingService : Service() {
             .setSmallIcon(R.drawable.ic_step)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
+            .setAutoCancel(false)
             .build()
     }
 
