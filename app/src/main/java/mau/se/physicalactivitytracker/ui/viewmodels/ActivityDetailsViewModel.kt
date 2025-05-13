@@ -68,8 +68,8 @@ class ActivityDetailsViewModel(
         val magnitudes = accelerometerData.map { accel ->
             sqrt(
                 accel.x.toDouble().pow(2) +
-                        accel.y.toDouble().pow(2) +
-                        accel.z.toDouble().pow(2)
+                accel.y.toDouble().pow(2) +
+                accel.z.toDouble().pow(2)
             )
         }
 
@@ -82,8 +82,10 @@ class ActivityDetailsViewModel(
 
         // Detect peaks indicating steps
         var stepCount = 0
-        val threshold = 1.5 // Adjust based on testing
-        val minStepInterval = 200L // Minimum time between steps (ms)
+        // Empirically determined
+        val threshold = 1.5
+        // Minimum time between steps (ms) - max stride 200 per minute
+        val minStepInterval = 300L
         var lastStepTime = accelerometerData.first().timestamp
 
         for (i in 1 until filtered.size - 1) {
