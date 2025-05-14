@@ -1,10 +1,27 @@
 <resources>
     <string name="app_name">Activity Tracker</string>
-    <string name="save_settings">Save Settings</string>
+    <string name="settings">Settings</string>
+    <string name="save">Save</string>
     <string name="language">Language</string>
-    <string name="units">Units</string>
     <string name="english">English</string>
-    <string name="swedish">Swedish</string>
+    <string name="swedish">Svenska</string>
+    <string name="measurement_units">Measurement Units</string>
     <string name="kilometers">Kilometers (km)</string>
     <string name="miles">Miles (mi)</string>
+    <string name="confirm_delete">Confirm Delete</string>
+    <string name="delete_confirmation">Are you sure you want to delete this walk? This action cannot be undone.</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="name_your_walk">Name Your Walk</string>
+    <string name="walk_name">Walk name</string>
+    <string name="history">History</string>
+    <string name="sort_by">Sort by: %s</string>
+    <string name="by_date">Date</string>
+    <string name="by_distance">Distance</string>
+    <string name="by_duration">Duration</string>
+    <string name="no_data">No tracking data available.\nTry a different time range.</string>
+    <string name="gps_required">GPS Required</string>
+    <string name="enable_gps_message">Please enable GPS for accurate location tracking.</string>
+    <string name="enable_gps">Enable GPS</string>
+    <string name="hold_to_stop">Hold for 3sec to stop recording</string>
 </resources>

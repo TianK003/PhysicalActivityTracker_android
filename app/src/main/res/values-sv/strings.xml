@@ -1,3 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Activity Tracker</string>
+    <string name="settings">Inställningar</string>
+    <string name="save">Spara</string>
+    <string name="language">Språk</string>
+    <string name="english">Engelska</string>
+    <string name="swedish">Svenska</string>
+    <string name="measurement_units">Mätenheter</string>
+    <string name="kilometers">Kilometer (km)</string>
+    <string name="miles">Engelska mil (mi)</string>
+    <string name="confirm_delete">Bekräfta borttagning</string>
+    <string name="delete_confirmation">Är du säker på att du vill ta bort denna promenad? Åtgärden kan inte ångras.</string>
+    <string name="delete">Ta bort</string>
+    <string name="cancel">Avbryt</string>
+    <string name="name_your_walk">Namnge din promenad</string>
+    <string name="walk_name">Promenadens namn</string>
+    <string name="history">Historik</string>
+    <string name="sort_by">Sortera efter: %s</string>
+    <string name="by_date">Datum</string>
+    <string name="by_distance">Distans</string>
+    <string name="by_duration">Varaktighet</string>
+    <string name="no_data">Ingen spårningsdata tillgänglig.\nProva ett annat tidsintervall.</string>
+    <string name="gps_required">GPS krävs</string>
+    <string name="enable_gps_message">Aktivera GPS för exakt positionsspårning.</string>
+    <string name="enable_gps">Aktivera GPS</string>
+    <string name="hold_to_stop">Håll inne i 3 sekunder för att stoppa inspelningen</string>
 </resources>
