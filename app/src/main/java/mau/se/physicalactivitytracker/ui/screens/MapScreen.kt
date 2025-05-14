@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.maps.android.compose.Polyline
@@ -173,19 +174,19 @@ fun MapScreen(
     if (showGpsDialog) {
         AlertDialog(
             onDismissRequest = { showGpsDialog = false },
-            title = { Text("GPS Required") },
-            text = { Text("Please enable GPS for accurate location tracking.") },
+            title = { Text(stringResource(R.string.gps_required)) },
+            text = { Text(stringResource(R.string.enable_gps_message)) },
             confirmButton = {
                 Button({
                     context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     showGpsDialog = false
                 }) {
-                    Text("Enable GPS")
+                    Text(stringResource(R.string.enable_gps))
                 }
             },
             dismissButton = {
                 Button({ showGpsDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -352,7 +353,7 @@ fun MapScreen(
                                     if (job.isCancelled) {
                                         Toast.makeText(
                                             context,
-                                            "Hold for 3sec to stop recording",
+                                            context.getString(R.string.hold_to_stop),
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }

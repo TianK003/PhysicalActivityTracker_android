@@ -23,10 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
+import mau.se.physicalactivitytracker.R
 
 @Composable
 fun NameDialog(
@@ -51,12 +53,12 @@ fun NameDialog(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text("Name Your Walk", style = MaterialTheme.typography.headlineSmall)
+                    Text(stringResource(R.string.name_your_walk), style = MaterialTheme.typography.headlineSmall)
                     Spacer(Modifier.height(16.dp))
                     TextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Walk name") },
+                        label = { Text(stringResource(R.string.walk_name)) },
                         singleLine = true
                     )
                     Spacer(Modifier.height(24.dp))
@@ -66,12 +68,12 @@ fun NameDialog(
                     ) {
                         TextButton(
                             onClick = { viewModel.cancelSaveActivity() }
-                        ) { Text("Cancel") }
+                        ) { Text(stringResource(R.string.cancel)) }
                         Spacer(Modifier.width(8.dp))
                         Button(
                             onClick = { viewModel.saveActivity(name) },
                             enabled = name.isNotBlank()
-                        ) { Text("Save") }
+                        ) { Text(stringResource(R.string.save)) }
                     }
                 }
             }

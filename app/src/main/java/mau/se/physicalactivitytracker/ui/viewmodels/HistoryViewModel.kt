@@ -2,12 +2,15 @@ package mau.se.physicalactivitytracker.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import mau.se.physicalactivitytracker.R
 import mau.se.physicalactivitytracker.WalkTrack
 import mau.se.physicalactivitytracker.data.records.model.ActivityRecord
 import mau.se.physicalactivitytracker.data.records.repository.ActivityRepository
@@ -104,7 +107,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
         _sortType.value = sortType
     }
 
-    enum class SortType { DATE, DISTANCE, DURATION }
+    enum class SortType(@StringRes val labelResId: Int) {
+        DATE(R.string.by_date),
+        DISTANCE(R.string.by_distance),
+        DURATION(R.string.by_duration)
+    }
 
     data class ActivityData(
         val id: Long,

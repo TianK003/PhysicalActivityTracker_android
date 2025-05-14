@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -231,20 +232,18 @@ fun ActivityRecord(
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Confirm Delete") },
-                text = { Text("Are you sure you want to delete this walk? This action cannot be undone.") },
+                title = { Text(stringResource(R.string.confirm_delete)) },
+                text = { Text(stringResource(R.string.delete_confirmation)) },
                 confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            onDelete()
-                        }
-                    ) { Text("Delete") }
+                    TextButton(onClick = {
+                        showDeleteDialog = false
+                        onDelete()
+                    }) { Text(stringResource(R.string.delete)) }
                 },
                 dismissButton = {
-                    TextButton(
-                        onClick = { showDeleteDialog = false }
-                    ) { Text("Cancel") }
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                 }
             )
         }

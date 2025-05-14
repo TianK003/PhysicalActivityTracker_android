@@ -1,6 +1,7 @@
 package mau.se.physicalactivitytracker.ui.screens
 
 import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModel
+import mau.se.physicalactivitytracker.R
 import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,6 +20,7 @@ import mau.se.physicalactivitytracker.ui.components.ActivityRecord
 import mau.se.physicalactivitytracker.ui.components.DateRangeSelector
 import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModelFactory
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
 import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -58,7 +60,7 @@ fun HistoryScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "History",
+                            text = stringResource(R.string.history),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -81,8 +83,7 @@ fun HistoryScreen(
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                                 ) {
                                     Text(
-                                        text = "Sort by: ${currentSortType.name.lowercase()
-                                            .replaceFirstChar { it.uppercase() }}",
+                                        text = stringResource(R.string.sort_by, stringResource(currentSortType.labelResId)),
                                         style = MaterialTheme.typography.labelLarge
                                     )
                                 }
@@ -93,7 +94,7 @@ fun HistoryScreen(
                             ) {
                                 HistoryViewModel.SortType.entries.forEach { sortType ->
                                     DropdownMenuItem(
-                                        text = { Text("By ${sortType.name.lowercase()}") },
+                                        text = { Text(stringResource(sortType.labelResId)) },
                                         onClick = {
                                             viewModel.setSortType(sortType)
                                             showSortMenu = false
@@ -124,7 +125,7 @@ fun HistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No tracking data available.\nTry a different time range.",
+                    text = stringResource(R.string.no_data),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

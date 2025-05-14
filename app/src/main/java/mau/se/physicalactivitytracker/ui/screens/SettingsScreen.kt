@@ -5,11 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
+import mau.se.physicalactivitytracker.R
 
 @Composable
 fun SettingsScreen() {
@@ -36,7 +38,7 @@ fun SettingsScreen() {
     ) {
 
         Text(
-            text = "Settings",
+            text = stringResource(R.string.settings),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
@@ -79,7 +81,7 @@ fun SettingsScreen() {
             )
         ) {
             Text(
-                "Save",
+                text = stringResource(R.string.save),
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -95,8 +97,8 @@ private fun LanguageDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val languages = mapOf(
-        "en" to "English",
-        "sv" to "Svenska"
+        "en" to stringResource(R.string.english),
+        "sv" to stringResource(R.string.swedish)
     )
 
     ExposedDropdownMenuBox(
@@ -107,7 +109,7 @@ private fun LanguageDropdown(
             readOnly = true,
             value = languages[currentLanguage] ?: "English",
             onValueChange = {},
-            label = { Text("Language") },
+            label = { Text(stringResource(R.string.language)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(
                 type = MenuAnchorType.PrimaryNotEditable,
@@ -139,8 +141,8 @@ private fun UnitsDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val units = mapOf(
-        false to "Kilometers (km)",
-        true to "Miles (mi)"
+        false to stringResource(R.string.kilometers),
+        true to stringResource(R.string.miles)
     )
 
     ExposedDropdownMenuBox(
@@ -153,7 +155,7 @@ private fun UnitsDropdown(
             readOnly = true,
             value = units[useImperial] ?: "Kilometers (km)",
             onValueChange = {},
-            label = { Text("Measurement Units") },
+            label = { Text(stringResource(R.string.measurement_units)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(
                 type = MenuAnchorType.PrimaryNotEditable,
