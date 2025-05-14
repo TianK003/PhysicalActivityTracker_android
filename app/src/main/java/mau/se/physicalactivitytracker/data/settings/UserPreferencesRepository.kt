@@ -1,4 +1,4 @@
-package mau.se.physicalactivitytracker.data
+package mau.se.physicalactivitytracker.data.settings
 
 import android.content.Context
 import androidx.datastore.core.DataStore
