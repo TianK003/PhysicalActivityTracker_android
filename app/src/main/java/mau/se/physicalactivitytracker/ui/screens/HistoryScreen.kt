@@ -21,6 +21,8 @@ import mau.se.physicalactivitytracker.ui.components.DateRangeSelector
 import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModelFactory
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.res.stringResource
+import mau.se.physicalactivitytracker.data.settings.UserPreferencesRepository
+import mau.se.physicalactivitytracker.ui.components.localizedStringResource
 import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,7 +37,9 @@ fun HistoryScreen(
     navController: NavController,
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
+    // read from the settings view model
     val useImperial by settingsViewModel.unitsPreference.collectAsState(initial = false)
+    val language by settingsViewModel.languagePreference.collectAsState(initial = UserPreferencesRepository.DEFAULT_LANGUAGE)
     val activities by viewModel.activities.collectAsState()
     var showSortMenu by rememberSaveable { mutableStateOf(false) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
@@ -60,7 +64,7 @@ fun HistoryScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = stringResource(R.string.history),
+                            text = localizedStringResource(R.string.history, language),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -83,7 +87,11 @@ fun HistoryScreen(
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.sort_by, stringResource(currentSortType.labelResId)),
+                                        text = localizedStringResource(
+                                            R.string.sort_by,
+                                            language,
+                                            localizedStringResource(currentSortType.labelResId, language)
+                                        ),
                                         style = MaterialTheme.typography.labelLarge
                                     )
                                 }
@@ -94,7 +102,7 @@ fun HistoryScreen(
                             ) {
                                 HistoryViewModel.SortType.entries.forEach { sortType ->
                                     DropdownMenuItem(
-                                        text = { Text(stringResource(sortType.labelResId)) },
+                                        text = { Text(localizedStringResource(sortType.labelResId, language)) },
                                         onClick = {
                                             viewModel.setSortType(sortType)
                                             showSortMenu = false
@@ -125,7 +133,7 @@ fun HistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = stringResource(R.string.no_data),
+                    text = localizedStringResource(R.string.no_data, language),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -171,15 +179,16 @@ fun HistoryScreen(
                         }
                         showPicker = false
                     }
-                ) { Text("OK") }
+                ) { // not going to change no matter the language
+                    Text("OK") }
             },
             dismissButton = {
-                TextButton(onClick = { showPicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showPicker = false }) { Text(localizedStringResource(R.string.cancel, language)) }
             }
         ) {
             DateRangePicker(
                 state = pickerState,
-                title = { Text("Select date range", Modifier.padding(16.dp)) }
+                title = { Text(localizedStringResource(R.string.select_date_range, language), Modifier.padding(16.dp)) }
             )
         }
     }

@@ -68,6 +68,7 @@ import kotlinx.coroutines.launch
 import mau.se.physicalactivitytracker.ui.components.StartActivityButton
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModelFactory
+import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 
 // Malmo Central Station coordinates - default fallback if gps is not available
 private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
@@ -77,7 +78,8 @@ private val MALMO_CENTRAL = LatLng(55.609929, 13.0008886)
 fun MapScreen(
     mapViewModel: MapViewModel = viewModel(
         factory = MapViewModelFactory(LocalContext.current.applicationContext as Application)
-    )
+    ),
+    settingsViewModel: SettingsViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -388,5 +390,5 @@ fun MapScreen(
             }
         }
     }
-    NameDialog(mapViewModel)
+    NameDialog(mapViewModel, settingsViewModel)
 }

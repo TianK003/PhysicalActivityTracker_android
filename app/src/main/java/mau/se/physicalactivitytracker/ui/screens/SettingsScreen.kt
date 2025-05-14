@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 import mau.se.physicalactivitytracker.R
+import mau.se.physicalactivitytracker.ui.components.localizedStringResource
 
 @Composable
 fun SettingsScreen() {
@@ -38,7 +39,7 @@ fun SettingsScreen() {
     ) {
 
         Text(
-            text = stringResource(R.string.settings),
+            text = localizedStringResource(R.string.settings, currentLanguage),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
@@ -60,7 +61,8 @@ fun SettingsScreen() {
         Box(modifier = Modifier.fillMaxWidth(0.8f)) {
             UnitsDropdown(
                 useImperial = draftUnits,
-                onUnitsSelected = { draftUnits = it }
+                onUnitsSelected = { draftUnits = it },
+                currentLanguage = currentLanguage
             )
         }
 
@@ -81,7 +83,7 @@ fun SettingsScreen() {
             )
         ) {
             Text(
-                text = stringResource(R.string.save),
+                text = localizedStringResource(R.string.save, currentLanguage),
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -97,8 +99,8 @@ private fun LanguageDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val languages = mapOf(
-        "en" to stringResource(R.string.english),
-        "sv" to stringResource(R.string.swedish)
+        "en" to localizedStringResource(R.string.english, currentLanguage),
+        "sv" to localizedStringResource(R.string.swedish, currentLanguage)
     )
 
     ExposedDropdownMenuBox(
@@ -109,7 +111,7 @@ private fun LanguageDropdown(
             readOnly = true,
             value = languages[currentLanguage] ?: "English",
             onValueChange = {},
-            label = { Text(stringResource(R.string.language)) },
+            label = { Text(localizedStringResource(R.string.language, currentLanguage)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(
                 type = MenuAnchorType.PrimaryNotEditable,
@@ -137,10 +139,12 @@ private fun LanguageDropdown(
 @Composable
 private fun UnitsDropdown(
     useImperial: Boolean,
-    onUnitsSelected: (Boolean) -> Unit
+    onUnitsSelected: (Boolean) -> Unit,
+    currentLanguage: String
 ) {
     var expanded by remember { mutableStateOf(false) }
     val units = mapOf(
+        // this is not going to change
         false to stringResource(R.string.kilometers),
         true to stringResource(R.string.miles)
     )
@@ -155,7 +159,7 @@ private fun UnitsDropdown(
             readOnly = true,
             value = units[useImperial] ?: "Kilometers (km)",
             onValueChange = {},
-            label = { Text(stringResource(R.string.measurement_units)) },
+            label = { Text(localizedStringResource(R.string.measurement_units, currentLanguage)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(
                 type = MenuAnchorType.PrimaryNotEditable,
