@@ -29,12 +29,17 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import mau.se.physicalactivitytracker.ui.viewmodels.MapViewModel
 import mau.se.physicalactivitytracker.R
+import mau.se.physicalactivitytracker.data.settings.UserPreferencesRepository
+import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 
 @Composable
 fun NameDialog(
-    viewModel: MapViewModel
+    viewModel: MapViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     var name by remember { mutableStateOf("") }
+
+    val language by settingsViewModel.languagePreference.collectAsState(initial = UserPreferencesRepository.DEFAULT_LANGUAGE)
 
     if (viewModel.showNameDialog.collectAsState().value) {
         Dialog(
@@ -53,12 +58,12 @@ fun NameDialog(
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(stringResource(R.string.name_your_walk), style = MaterialTheme.typography.headlineSmall)
+                    Text(localizedStringResource(R.string.name_your_walk, language), style = MaterialTheme.typography.headlineSmall)
                     Spacer(Modifier.height(16.dp))
                     TextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text(stringResource(R.string.walk_name)) },
+                        label = { Text(localizedStringResource(R.string.walk_name, language)) },
                         singleLine = true
                     )
                     Spacer(Modifier.height(24.dp))
@@ -68,12 +73,12 @@ fun NameDialog(
                     ) {
                         TextButton(
                             onClick = { viewModel.cancelSaveActivity() }
-                        ) { Text(stringResource(R.string.cancel)) }
+                        ) { Text(localizedStringResource(R.string.cancel, language)) }
                         Spacer(Modifier.width(8.dp))
                         Button(
                             onClick = { viewModel.saveActivity(name) },
                             enabled = name.isNotBlank()
-                        ) { Text(stringResource(R.string.save)) }
+                        ) { Text(localizedStringResource(R.string.save, language)) }
                     }
                 }
             }
