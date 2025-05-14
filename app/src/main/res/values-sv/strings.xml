@@ -13,6 +13,7 @@
     <string name="delete_confirmation">Är du säker på att du vill ta bort denna promenad? Åtgärden kan inte ångras.</string>
     <string name="delete">Ta bort</string>
     <string name="cancel">Avbryt</string>
+    <string name="select_date_range">Select date range</string>
     <string name="name_your_walk">Namnge din promenad</string>
     <string name="walk_name">Promenadens namn</string>
     <string name="history">Historik</string>
