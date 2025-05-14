@@ -19,6 +19,7 @@ import mau.se.physicalactivitytracker.ui.components.ActivityRecord
 import mau.se.physicalactivitytracker.ui.components.DateRangeSelector
 import mau.se.physicalactivitytracker.ui.viewmodels.HistoryViewModelFactory
 import androidx.compose.foundation.lazy.items
+import mau.se.physicalactivitytracker.ui.viewmodels.SettingsViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,8 +30,10 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = viewModel(
         factory = HistoryViewModelFactory(LocalContext.current.applicationContext as Application)
     ),
-    navController: NavController
+    navController: NavController,
+    settingsViewModel: SettingsViewModel = viewModel()
 ) {
+    val useImperial by settingsViewModel.unitsPreference.collectAsState(initial = false)
     val activities by viewModel.activities.collectAsState()
     var showSortMenu by rememberSaveable { mutableStateOf(false) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
@@ -135,6 +138,7 @@ fun HistoryScreen(
                         distance = activity.distance,
                         steps = activity.steps,
                         duration = activity.duration,
+                        useImperial = useImperial,
                         onMapClick = {
                             navController.navigate("activity_details/${activity.id}")
                         },

@@ -22,7 +22,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,20 +36,42 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-private fun getDistanceIcon(distance: Double): ImageVector {
-    return when {
-        distance < 1000 -> ImageVector.vectorResource(R.drawable.ic_short)
-        distance < 10000 -> ImageVector.vectorResource(R.drawable.ic_medium)
-        else -> ImageVector.vectorResource(R.drawable.ic_long)
+private fun getDistanceIcon(distance: Double, useImperial: Boolean): ImageVector {
+    return if (useImperial) {
+        when {
+            // 1 mile
+            distance < 1609.34 -> ImageVector.vectorResource(R.drawable.ic_short)
+            // 5 miles
+            distance < 8046.72 -> ImageVector.vectorResource(R.drawable.ic_medium)
+            else -> ImageVector.vectorResource(R.drawable.ic_long)
+        }
+    } else {
+        when {
+            // 1km
+            distance < 1000 -> ImageVector.vectorResource(R.drawable.ic_short)
+            // 10km
+            distance < 10000 -> ImageVector.vectorResource(R.drawable.ic_medium)
+            else -> ImageVector.vectorResource(R.drawable.ic_long)
+        }
     }
 }
 
 @Composable
-private fun formatDistance(distance: Double): String {
-    return if (distance < 1000) {
-        "${distance.toInt()}m"
+private fun formatDistance(distance: Double, useImperial: Boolean): String {
+    return if (useImperial) {
+        if (distance < 1609.34) {
+            val feet = distance * 3.28084
+            "${feet.toInt()} ft"
+        } else {
+            val miles = distance / 1609.34
+            "%.1f mi".format(miles)
+        }
     } else {
-        "%.1fkm".format(distance / 1000)
+        if (distance < 1000) {
+            "${distance.toInt()}m"
+        } else {
+            "%.1f km".format(distance / 1000)
+        }
     }
 }
 
@@ -61,13 +82,14 @@ fun ActivityRecord(
     distance: Double,
     steps: Int,
     duration: String,
+    useImperial: Boolean,
     modifier: Modifier = Modifier,
     initialExpanded: Boolean = false,
     onMapClick: () -> Unit,
     onDelete: () -> Unit = {}
 ) {
-    var isExpanded by rememberSaveable { mutableStateOf(initialExpanded) }
-    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(initialExpanded) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     Surface(
@@ -87,7 +109,7 @@ fun ActivityRecord(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
-                    imageVector = getDistanceIcon(distance),
+                    imageVector = getDistanceIcon(distance, useImperial),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
@@ -99,7 +121,7 @@ fun ActivityRecord(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = formatDistance(distance),
+                    text = formatDistance(distance, useImperial),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Bold
                     ),

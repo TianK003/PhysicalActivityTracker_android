@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import mau.se.physicalactivitytracker.data.UserPreferencesRepository
+import mau.se.physicalactivitytracker.data.settings.UserPreferencesRepository
 
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
